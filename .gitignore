@@ -1,10 +1,19 @@
+# Python
 .venv/
-__pycache__/
+**/__pycache__/
 *.pyc
+
+# IDEs and Editors
 .vscode/
-.DB_Store
+.DS_Store
+
+# Logs and Environment
+logs/
+*.log
+.env
+
+# Runtime and App Storage
 archive/
 data/
 chroma_db/
 storage/
-logs/

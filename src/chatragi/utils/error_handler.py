@@ -7,7 +7,9 @@ JSON error response to the client.
 """
 
 from flask import jsonify
+
 from chatragi.utils.logger_config import logger
+
 
 def handle_exception(e):
     """
@@ -25,6 +27,6 @@ def handle_exception(e):
     """
     # Log the exception details along with the traceback for debugging purposes.
     logger.exception("Unhandled exception occurred", exc_info=e)
-    
+
     # Return a generic error message to the client without exposing internal details.
     return jsonify({"error": "An unexpected error occurred. Please try again."}), 500

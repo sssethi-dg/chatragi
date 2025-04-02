@@ -6,7 +6,9 @@ It configures logging to output messages both to a file and the console.
 """
 
 import logging
+
 from chatragi.config import LOG_FILE
+
 
 def setup_logger() -> logging.Logger:
     """
@@ -24,9 +26,9 @@ def setup_logger() -> logging.Logger:
         level=logging.INFO,  # Change to logging.DEBUG for more detailed logs
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
         handlers=[
-            logging.FileHandler(LOG_FILE, mode='a'),  # Log messages to a file
-            logging.StreamHandler()  # Log messages to the console
-        ]
+            logging.FileHandler(LOG_FILE, mode="a"),  # Log messages to a file
+            logging.StreamHandler(),  # Log messages to the console
+        ],
     )
 
     # Create and return a logger instance with the name "ChatRagi"

@@ -6,26 +6,36 @@ splits their text into manageable chunks with metadata, and checks for duplicate
 before adding the processed chunks into the vector store (ChromaDB) for later retrieval.
 """
 
-import os
-import shutil
+import hashlib
 import json
+import os
 import re
+import shutil
+from typing import List
+
 import pandas as pd
 import pdfplumber
-import hashlib
-from chatragi.config import DATA_FOLDER, ARCHIVE_FOLDER, PERSIST_DIR, EMBED_MODEL, CONTEXT_WINDOW
-from llama_index.core import VectorStoreIndex, StorageContext, Document
+from llama_index.core import Document, StorageContext, VectorStoreIndex
 from llama_index.vector_stores.chroma import ChromaVectorStore
+
+from chatragi.config import (
+    ARCHIVE_FOLDER,
+    CONTEXT_WINDOW,
+    DATA_FOLDER,
+    EMBED_MODEL,
+    PERSIST_DIR,
+)
 from chatragi.utils.db_utils import chroma_client
 from chatragi.utils.logger_config import logger  # Centralized logging configuration
-
 
 # Optional dependency for advanced token counting; falls back to word count if unavailable.
 try:
     import tiktoken
+
     tokenizer = tiktoken.get_encoding("cl100k_base")
 except ImportError:
     tokenizer = None
+
 
 def move_to_archive(filename: str):
     """
@@ -52,6 +62,7 @@ def move_to_archive(filename: str):
     shutil.move(src_path, dest_path)
     logger.info("Moved file '%s' to archive successfully.", filename)
 
+
 def compute_file_hash(file_path: str) -> str:
     """
     Computes a SHA-256 hash for a file's contents for duplicate detection.
@@ -68,10 +79,11 @@ def compute_file_hash(file_path: str) -> str:
             # Read file in small chunks to conserve memory.
             while chunk := f.read(8192):
                 hasher.update(chunk)
+        return hasher.hexdigest()
     except Exception as e:
-        logger.exception("Error computing hash for '%s': %s", file_path, e)
-        return None
-    return hasher.hexdigest()
+        logger.exception(f"Error computing hash for '{file_path}': {e}")
+        return ""  # Return empty string on error
+
 
 def estimate_tokens(text: str) -> int:
     """
@@ -85,7 +97,10 @@ def estimate_tokens(text: str) -> int:
     """
     return len(text.split())
 
-def split_text_into_chunks(text: str, max_tokens: int = CONTEXT_WINDOW, overlap_ratio: float = 0.2) -> list:
+
+def split_text_into_chunks(
+    text: str, max_tokens: int = CONTEXT_WINDOW, overlap_ratio: float = 0.2
+) -> list:
     """
     Splits text into overlapping chunks based on estimated token count and sentence boundaries.
 
@@ -98,9 +113,9 @@ def split_text_into_chunks(text: str, max_tokens: int = CONTEXT_WINDOW, overlap_
         list: List of text chunks.
     """
     # Split text at sentence-ending punctuation followed by whitespace.
-    sentences = re.split(r'(?<=[.!?])\s+', text)
-    chunks = []
-    current_chunk = []
+    sentences = re.split(r"(?<=[.!?])\s+", text)
+    chunks: List[str] = []
+    current_chunk: List[str] = []
     # Determine the number of words to retain from the previous chunk as overlap.
     overlap = int(max_tokens * overlap_ratio)
 
@@ -120,6 +135,7 @@ def split_text_into_chunks(text: str, max_tokens: int = CONTEXT_WINDOW, overlap_
         chunks.append(" ".join(current_chunk))
 
     return chunks
+
 
 def chunk_text(text: str, file_name: str, source: str) -> list:
     """
@@ -141,11 +157,13 @@ def chunk_text(text: str, file_name: str, source: str) -> list:
             "metadata": {
                 "file_name": file_name,
                 "source": source,
-                "hash": hashlib.md5(chunk.encode()).hexdigest()
-            }
+                "hash": hashlib.md5(chunk.encode()).hexdigest(),
+            },
         }
-        for chunk in chunks if chunk
+        for chunk in chunks
+        if chunk
     ]
+
 
 def load_pdf(file_path: str) -> list:
     """
@@ -159,16 +177,23 @@ def load_pdf(file_path: str) -> list:
     """
     try:
         with pdfplumber.open(file_path) as pdf:
-            text = "\n\n".join(page.extract_text() for page in pdf.pages if page.extract_text())
-        
+            text = "\n\n".join(
+                page.extract_text() for page in pdf.pages if page.extract_text()
+            )
+
         if not text.strip():
-            logger.warning("Skipping empty or unreadable PDF: %s", os.path.basename(file_path))
+            logger.warning(
+                "Skipping empty or unreadable PDF: %s", os.path.basename(file_path)
+            )
             return []
-        
+
         return chunk_text(text, os.path.basename(file_path), "pdf")
     except Exception as e:
-        logger.exception("Error processing PDF '%s': %s", os.path.basename(file_path), e)
+        logger.exception(
+            "Error processing PDF '%s': %s", os.path.basename(file_path), e
+        )
         return []
+
 
 def load_csv(file_path: str) -> list:
     """
@@ -185,12 +210,15 @@ def load_csv(file_path: str) -> list:
         if df.empty:
             logger.warning("Skipping empty CSV: %s", os.path.basename(file_path))
             return []
-        
+
         text = df.to_string(index=False)
         return chunk_text(text, os.path.basename(file_path), "csv")
     except Exception as e:
-        logger.exception("Error processing CSV '%s': %s", os.path.basename(file_path), e)
+        logger.exception(
+            "Error processing CSV '%s': %s", os.path.basename(file_path), e
+        )
         return []
+
 
 def load_json(file_path: str) -> list:
     """
@@ -205,16 +233,19 @@ def load_json(file_path: str) -> list:
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        
+
         if not data:
             logger.warning("Skipping empty JSON: %s", os.path.basename(file_path))
             return []
-        
+
         text = json.dumps(data, indent=2)
         return chunk_text(text, os.path.basename(file_path), "json")
     except Exception as e:
-        logger.exception("Error processing JSON '%s': %s", os.path.basename(file_path), e)
+        logger.exception(
+            "Error processing JSON '%s': %s", os.path.basename(file_path), e
+        )
         return []
+
 
 def load_txt(file_path: str) -> list:
     """
@@ -229,15 +260,18 @@ def load_txt(file_path: str) -> list:
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             text = f.read().strip()
-        
+
         if not text:
             logger.warning("Skipping empty TXT file: %s", os.path.basename(file_path))
             return []
-        
+
         return chunk_text(text, os.path.basename(file_path), "text")
     except Exception as e:
-        logger.exception("Error processing TXT '%s': %s", os.path.basename(file_path), e)
+        logger.exception(
+            "Error processing TXT '%s': %s", os.path.basename(file_path), e
+        )
         return []
+
 
 def load_document(file_path: str) -> list:
     """
@@ -256,13 +290,14 @@ def load_document(file_path: str) -> list:
         ".txt": load_txt,
         ".md": load_txt,
     }
-    
+
     ext = os.path.splitext(file_path)[1].lower()
     if ext not in loaders:
         logger.warning("Unsupported file format: %s. Skipping.", file_path)
         return []
-    
+
     return loaders[ext](file_path)
+
 
 def process_new_documents(file_path: str):
     """
@@ -273,42 +308,59 @@ def process_new_documents(file_path: str):
         file_path (str): Path to the document being processed.
     """
     logger.info("Processing file: %s", os.path.basename(file_path))
-    
+
     # Compute a hash of the entire file for duplicate detection.
     file_hash = compute_file_hash(file_path)
     if not file_hash:
         logger.warning("Hash computation failed for %s. Skipping.", file_path)
         return
-    
+
     # Load document and split into text chunks.
     chunks = load_document(file_path)
     if not chunks:
         logger.warning("No valid content found in %s. Skipping.", file_path)
         return
-    
+
     # Retrieve the existing documents from ChromaDB.
     doc_collection = chroma_client.get_or_create_collection("doc_index")
     stored_docs = doc_collection.get()
-    
+
     # Build a set of existing chunk hashes for duplicate detection.
-    existing_hashes = {meta.get("hash", "") for meta in stored_docs.get("metadatas", [])}
-    
+    existing_hashes = {
+        meta.get("hash", "") for meta in stored_docs.get("metadatas", [])
+    }
+
     # If any chunk's hash is already present, treat the file as duplicate.
     if any(chunk["metadata"]["hash"] in existing_hashes for chunk in chunks):
-        logger.warning("Duplicate document detected: %s. Skipping indexing.", os.path.basename(file_path))
+        logger.warning(
+            "Duplicate document detected: %s. Skipping indexing.",
+            os.path.basename(file_path),
+        )
         move_to_archive(os.path.basename(file_path))
         return
 
     try:
         # Convert each chunk into a Document object for indexing.
-        document_objects = [Document(text=chunk["text"], metadata=chunk["metadata"]) for chunk in chunks]
-        
+        document_objects = [
+            Document(text=chunk["text"], metadata=chunk["metadata"]) for chunk in chunks
+        ]
+
         # Build the vector store index and persist it.
-        storage_context = StorageContext.from_defaults(vector_store=ChromaVectorStore(chroma_collection=doc_collection))
-        index = VectorStoreIndex.from_documents(document_objects, storage_context=storage_context, embed_model=EMBED_MODEL)
+        storage_context = StorageContext.from_defaults(
+            vector_store=ChromaVectorStore(chroma_collection=doc_collection)
+        )
+        index = VectorStoreIndex.from_documents(
+            document_objects, storage_context=storage_context, embed_model=EMBED_MODEL
+        )
         index.storage_context.persist(persist_dir=PERSIST_DIR)
-        
-        logger.info("Successfully indexed %d chunks from '%s'", len(chunks), os.path.basename(file_path))
+
+        logger.info(
+            "Successfully indexed %d chunks from '%s'",
+            len(chunks),
+            os.path.basename(file_path),
+        )
         move_to_archive(os.path.basename(file_path))
     except Exception as e:
-        logger.exception("Error indexing document '%s': %s", os.path.basename(file_path), e)
+        logger.exception(
+            "Error indexing document '%s': %s", os.path.basename(file_path), e
+        )

@@ -9,25 +9,33 @@ users can interact via a command-line interface.
 import os
 import time
 import warnings
-from chatragi.config import PERSIST_DIR, EMBED_MODEL, SIMILARITY_TOP_K, SIMILARITY_CUTOFF
-from llama_index.core import VectorStoreIndex, StorageContext, Document
+
+from llama_index.core import Document, StorageContext, VectorStoreIndex
 from llama_index.vector_stores.chroma import ChromaVectorStore
-from chatragi.utils.db_utils import chroma_client
+
+from chatragi.config import (
+    EMBED_MODEL,
+    PERSIST_DIR,
+    SIMILARITY_CUTOFF,
+    SIMILARITY_TOP_K,
+)
 from chatragi.utils.chat_memory import store_memory
+from chatragi.utils.db_utils import chroma_client
 from chatragi.utils.logger_config import logger  # Centralized logger
 
 # Suppress unnecessary warnings for cleaner logs
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 # Global variable to store the initialized query engine
 query_engine = None
+
 
 def refresh_index():
     """
     Refreshes or loads the document index for querying.
 
     This function retrieves the document collection from ChromaDB, builds a new vector
-    index or loads an existing one from disk, and initializes the global query engine 
+    index or loads an existing one from disk, and initializes the global query engine
     used to process user queries.
 
     Raises:
@@ -56,7 +64,7 @@ def refresh_index():
             index = VectorStoreIndex.from_vector_store(
                 vector_store=vector_store,
                 storage_context=storage_context,
-                embed_model=EMBED_MODEL
+                embed_model=EMBED_MODEL,
             )
         else:
             logger.info("Building a new index...")
@@ -76,16 +84,13 @@ def refresh_index():
 
             # Create a new index and persist it to disk
             index = VectorStoreIndex.from_documents(
-                documents,
-                storage_context=storage_context,
-                embed_model=EMBED_MODEL
+                documents, storage_context=storage_context, embed_model=EMBED_MODEL
             )
             index.storage_context.persist(persist_dir=PERSIST_DIR)
 
         # Initialize the query engine with the defined similarity settings
         query_engine = index.as_query_engine(
-            similarity_top_k=SIMILARITY_TOP_K,
-            similarity_cutoff=SIMILARITY_CUTOFF
+            similarity_top_k=SIMILARITY_TOP_K, similarity_cutoff=SIMILARITY_CUTOFF
         )
         logger.info("Index is ready.")
 
@@ -98,7 +103,7 @@ def ask_chatbot(query: str) -> str:
     """
     Processes a user's query through the chatbot and stores the conversation memory.
 
-    This function submits the query to the query engine and, upon receiving a response, 
+    This function submits the query to the query engine and, upon receiving a response,
     stores the interaction in memory for future retrieval.
 
     Args:

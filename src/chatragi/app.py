@@ -7,12 +7,15 @@ memories, refresh the document index, and list stored documents and memories.
 """
 
 # import os
-import markdown
-from flask import Flask, request, jsonify, render_template
+import markdown  # type: ignore
+from flask import Flask, jsonify, render_template, request
+
+from chatragi.utils.chat_memory import fetch_all_memories, store_memory
 from chatragi.utils.chatbot import query_engine, refresh_index
-from chatragi.utils.chat_memory import store_memory, fetch_all_memories
 from chatragi.utils.db_utils import list_documents
-from chatragi.utils.logger_config import logger  # Centralized logger for the application
+from chatragi.utils.logger_config import (  # Centralized logger for the application
+    logger,
+)
 
 app = Flask(__name__)
 
@@ -45,8 +48,7 @@ def format_response(response_text: str) -> str:
     """
     try:
         return markdown.markdown(
-            response_text,
-            extensions=['fenced_code', 'codehilite']
+            response_text, extensions=["fenced_code", "codehilite"]
         )
     except Exception as e:
         logger.exception("Error formatting response text: %s", e)
@@ -81,7 +83,7 @@ def ask():
         formatted_response = {
             "answer": formatted_answer,
             "score": getattr(response, "score", None),
-            "metadata": getattr(response, "metadata", {})
+            "metadata": getattr(response, "metadata", {}),
         }
 
         return jsonify(formatted_response)
@@ -111,7 +113,10 @@ def store_memory_route():
 
         if not user_query or not response:
             logger.error("Missing user_query or response in memory store request.")
-            return jsonify({"error": "Both 'user_query' and 'response' are required"}), 400
+            return (
+                jsonify({"error": "Both 'user_query' and 'response' are required"}),
+                400,
+            )
 
         store_memory(user_query, response, is_important)
         return jsonify({"status": "success", "message": "Memory stored successfully."})

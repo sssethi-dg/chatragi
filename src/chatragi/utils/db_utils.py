@@ -7,8 +7,10 @@ memories, logging the number of indexed documents, listing available collections
 removing specific documents by filename.
 """
 
-import chromadb
 from datetime import datetime, timedelta
+
+import chromadb
+
 from chatragi.config import DB_PATH, TIME_DECAY_DAYS
 from chatragi.utils.logger_config import logger  # Import the centralized logger
 
@@ -36,7 +38,9 @@ def delete_non_important_memories() -> None:
     try:
         results = memory_collection.get()  # Retrieve all stored memories
         ids_to_delete = []
-        for doc, meta in zip(results.get("documents", []), results.get("metadatas", [])):
+        for doc, meta in zip(
+            results.get("documents", []), results.get("metadatas", [])
+        ):
             if not isinstance(meta, dict):
                 continue  # Skip invalid metadata entries
             timestamp = meta.get("timestamp")
@@ -52,7 +56,11 @@ def delete_non_important_memories() -> None:
                     logger.warning("Missing 'id' in metadata: %s", meta)
         if ids_to_delete:
             memory_collection.delete(ids=ids_to_delete)
-            logger.info("Deleted %d non-important memories older than %d days.", len(ids_to_delete), TIME_DECAY_DAYS)
+            logger.info(
+                "Deleted %d non-important memories older than %d days.",
+                len(ids_to_delete),
+                TIME_DECAY_DAYS,
+            )
         else:
             logger.info("No old, non-important memories to delete.")
     except Exception as e:

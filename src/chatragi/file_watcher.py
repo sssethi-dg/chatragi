@@ -7,15 +7,18 @@ them for indexing. Processed files are archived to avoid duplicate indexing.
 
 import os
 import time
-from watchdog.observers import Observer
+
 from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
+
 from chatragi.config import DATA_FOLDER
-from chatragi.utils.document_loader import process_new_documents
 from chatragi.utils.db_utils import chroma_client
+from chatragi.utils.document_loader import process_new_documents
 from chatragi.utils.logger_config import logger  # Import centralized logger
 
 # Set to track processed files and avoid redundant processing
 processed_files = set()
+
 
 def is_valid_file(file_name: str) -> bool:
     """
@@ -116,14 +119,20 @@ class NewFileHandler(FileSystemEventHandler):
 
         try:
             # Ignore files that have already been processed or are invalid
-            if file_name in processed_files or not os.path.exists(file_path) or not is_valid_file(file_name):
+            if (
+                file_name in processed_files
+                or not os.path.exists(file_path)
+                or not is_valid_file(file_name)
+            ):
                 return
 
             logger.info("New file detected: %s", file_path)
 
             # Process the file only if it is stable (i.e., not still being copied)
             if not is_file_stable(file_path):
-                logger.warning("Skipping file '%s' as it may still be copying.", file_name)
+                logger.warning(
+                    "Skipping file '%s' as it may still be copying.", file_name
+                )
                 return
 
             # Process the new document and mark it as processed
@@ -133,7 +142,9 @@ class NewFileHandler(FileSystemEventHandler):
             # Log the updated count of indexed document chunks
             doc_collection = chroma_client.get_or_create_collection("doc_index")
             indexed_count = len(doc_collection.get().get("documents", []))
-            logger.info("ChromaDB now contains %d indexed document chunks.", indexed_count)
+            logger.info(
+                "ChromaDB now contains %d indexed document chunks.", indexed_count
+            )
 
         except Exception as e:
             logger.exception("Error processing new file '%s': %s", file_name, e)
@@ -158,7 +169,7 @@ if __name__ == "__main__":
 
         logger.info("Watching '%s' for new files...", DATA_FOLDER)
         observer.start()
-        
+
         # Main loop: keep the script running in the background
         while True:
             time.sleep(5)  # Keep the observer running in the background

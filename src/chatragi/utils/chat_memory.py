@@ -7,8 +7,10 @@ conversations based on the user's current query.
 """
 
 from datetime import datetime
+
 from chatragi.utils.db_utils import memory_collection
 from chatragi.utils.logger_config import logger  # Centralized logger for the project
+
 
 def retrieve_memory(user_query: str) -> list:
     """
@@ -43,7 +45,9 @@ def retrieve_memory(user_query: str) -> list:
 
             timestamp = meta.get("timestamp")
             if not timestamp:
-                logger.warning("Missing timestamp in metadata, skipping entry: %s", meta)
+                logger.warning(
+                    "Missing timestamp in metadata, skipping entry: %s", meta
+                )
                 continue
 
             try:
@@ -74,18 +78,22 @@ def fetch_all_memories() -> list:
     try:
         results = memory_collection.get()
         memories = []
-        for doc, meta in zip(results.get("documents", []), results.get("metadatas", [])):
+        for doc, meta in zip(
+            results.get("documents", []), results.get("metadatas", [])
+        ):
             # Normalize metadata if it is wrapped in a list
             if isinstance(meta, list) and meta:
                 meta = meta[0]
             if not isinstance(meta, dict):
                 continue
-            memories.append({
-                "user_query": meta.get("user_query", ""),
-                "timestamp": meta.get("timestamp", ""),
-                "important": meta.get("important", False),
-                "conversation": doc
-            })
+            memories.append(
+                {
+                    "user_query": meta.get("user_query", ""),
+                    "timestamp": meta.get("timestamp", ""),
+                    "important": meta.get("important", False),
+                    "conversation": doc,
+                }
+            )
         # Sort memories by timestamp in descending order
         memories.sort(key=lambda x: x["timestamp"], reverse=True)
         return memories
@@ -112,14 +120,20 @@ def store_memory(user_query: str, response: str, is_important: bool) -> None:
     memory_entry = f"User: {user_query}\nAI: {response}"
 
     try:
-        existing_results = memory_collection.query(query_texts=[user_query], n_results=10)
+        existing_results = memory_collection.query(
+            query_texts=[user_query], n_results=10
+        )
     except Exception as e:
-        logger.exception("Error querying existing memory for user_query '%s': %s", user_query, e)
+        logger.exception(
+            "Error querying existing memory for user_query '%s': %s", user_query, e
+        )
         return
 
-    for doc, meta, doc_id in zip(existing_results.get("documents", []),
-                                 existing_results.get("metadatas", []),
-                                 existing_results.get("ids", [])):
+    for doc, meta, doc_id in zip(
+        existing_results.get("documents", []),
+        existing_results.get("metadatas", []),
+        existing_results.get("ids", []),
+    ):
         if isinstance(meta, list) and meta:
             meta = meta[0]
         if not isinstance(meta, dict) or "user_query" not in meta:
@@ -131,17 +145,22 @@ def store_memory(user_query: str, response: str, is_important: bool) -> None:
                 try:
                     memory_collection.update(
                         ids=[doc_id],
-                        metadatas=[{
-                            "user_query": user_query,
-                            "timestamp": meta["timestamp"],
-                            "important": True
-                        }]
+                        metadatas=[
+                            {
+                                "user_query": user_query,
+                                "timestamp": meta["timestamp"],
+                                "important": True,
+                            }
+                        ],
                     )
                     logger.info("Memory exists. Updated importance for ID: %s", doc_id)
                 except Exception as e:
                     logger.exception("Error updating memory for ID '%s': %s", doc_id, e)
             else:
-                logger.info("Memory already exists for user_query '%s'. No update needed.", user_query)
+                logger.info(
+                    "Memory already exists for user_query '%s'. No update needed.",
+                    user_query,
+                )
             return  # Prevent duplicate storage
 
     # If no duplicate was found, store the new memory entry
@@ -150,12 +169,14 @@ def store_memory(user_query: str, response: str, is_important: bool) -> None:
     try:
         memory_collection.add(
             documents=[memory_entry],
-            metadatas=[{
-                "user_query": user_query,
-                "timestamp": timestamp,
-                "important": is_important
-            }],
-            ids=[new_id]
+            metadatas=[
+                {
+                    "user_query": user_query,
+                    "timestamp": timestamp,
+                    "important": is_important,
+                }
+            ],
+            ids=[new_id],
         )
         logger.info("Memory stored successfully with ID: %s", new_id)
     except Exception as e:

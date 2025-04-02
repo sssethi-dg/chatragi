@@ -1,22 +1,35 @@
 # .pre-commit-config.yaml
 repos:
+  # Code formatter: Black (PEP8 compliant)
   - repo: https://github.com/psf/black
-    rev: 24.3.0
+    rev: 24.3.0  # Use latest stable release
     hooks:
       - id: black
+        language_version: python3
 
+  # Import sorter: isort
   - repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.12.0
+    rev: v5.10.1
     hooks:
       - id: isort
+        args: ["--profile", "black"]  # Ensures compatibility with Black
+        language_version: python3
 
+  # Linter: Flake8
   - repo: https://github.com/pycqa/flake8
     rev: 6.1.0
     hooks:
       - id: flake8
+        args: ["--max-line-length=100", "--extend-ignore=B007,D205,D400,D401,D104,E501,W291"]
+        additional_dependencies:
+          - flake8-docstrings  # Optional: Check for missing or malformed docstrings
+          - flake8-bugbear      # Optional: Detect common bugs and design issues
+        language_version: python3
 
+  # Static type checker: mypy
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.9.0
     hooks:
       - id: mypy
         args: ["--ignore-missing-imports"]
+        language_version: python3

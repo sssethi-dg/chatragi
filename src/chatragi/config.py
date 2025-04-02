@@ -6,13 +6,14 @@ LLM model configuration, and performance optimizations. Logging and exception
 handling are incorporated to assist with troubleshooting and monitoring.
 """
 
-import os
 import logging
+import os
 from pathlib import Path
+
 from llama_index.core import Settings
-from llama_index.llms.ollama import Ollama
-from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.embeddings.ollama import OllamaEmbedding
+from llama_index.llms.ollama import Ollama
 
 # Set up logging using the project's logger configuration.
 # It is assumed that logger_config.py has been added to the project.
@@ -39,7 +40,9 @@ LOG_FILE_NAME = "chatragi.log"
 LOG_FILE = os.path.join(LOG_FOLDER, LOG_FILE_NAME)
 
 # ------------------- LLM Model Configuration -------------------
-DEFAULT_MODEL = "phi4:latest"  # Options: "phi4:latest", "gemma3:12b", "llama3.2-vision:latest"
+DEFAULT_MODEL = (
+    "phi4:latest"  # Options: "phi4:latest", "gemma3:12b", "llama3.2-vision:latest"
+)
 LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", DEFAULT_MODEL)
 
 try:
@@ -47,7 +50,7 @@ try:
     LLM_MODEL = Ollama(
         model=LLM_MODEL_NAME,
         request_timeout=360.00,
-        options={"num_gpu_layers": 1, "quantization": "4bit"}
+        options={"num_gpu_layers": 1, "quantization": "4bit"},
     )
     logger.info("LLM model loaded: %s", LLM_MODEL_NAME)
 except Exception as e:
@@ -63,7 +66,9 @@ try:
     EMBED_MODEL = OllamaEmbedding(model_name=EMBED_MODEL_NAME)
     logger.info("Using Ollama embedding model: %s", EMBED_MODEL_NAME)
 except Exception as e:
-    logger.warning("Ollama embeddings not available; falling back to Hugging Face. Error: %s", e)
+    logger.warning(
+        "Ollama embeddings not available; falling back to Hugging Face. Error: %s", e
+    )
     EMBED_MODEL = HuggingFaceEmbedding(model_name="all-MiniLM-L6-v2")
 
 # Apply settings globally
@@ -72,11 +77,17 @@ Settings.embed_model = EMBED_MODEL
 
 # ------------------- LLM Query Optimization -------------------
 CONTEXT_WINDOW = int(os.getenv("CONTEXT_WINDOW", 2048))  # Maximum token size for inputs
-NUM_OUTPUT_TOKENS = int(os.getenv("NUM_OUTPUT_TOKENS", 2000))  # Maximum tokens in generated responses
+NUM_OUTPUT_TOKENS = int(
+    os.getenv("NUM_OUTPUT_TOKENS", 2000)
+)  # Maximum tokens in generated responses
 
 # Fine-tune retrieval parameters
-SIMILARITY_TOP_K = int(os.getenv("SIMILARITY_TOP_K", 5))  # Number of document chunks to retrieve
-SIMILARITY_CUTOFF = float(os.getenv("SIMILARITY_CUTOFF", 0.8))  # Minimum similarity threshold
+SIMILARITY_TOP_K = int(
+    os.getenv("SIMILARITY_TOP_K", 5)
+)  # Number of document chunks to retrieve
+SIMILARITY_CUTOFF = float(
+    os.getenv("SIMILARITY_CUTOFF", 0.8)
+)  # Minimum similarity threshold
 
 # ------------------- Memory Management -------------------
 TIME_DECAY_DAYS = int(os.getenv("TIME_DECAY_DAYS", 3))
@@ -85,8 +96,13 @@ MAX_QUERY_LENGTH = int(os.getenv("MAX_QUERY_LENGTH", 1500))
 # ------------------- Adaptive Chunking (Dynamic Splitting) -------------------
 DYNAMIC_CHUNKING = {
     "thresholds": [500, 2000, 5000],  # Word count thresholds for different strategies
-    "sizes": [256, 512, 1024, 1536],  # Optimized chunk sizes corresponding to thresholds
-    "overlap": [0.5, 0.3, 0.2, 0.1]   # Overlap ratios to maintain context
+    "sizes": [
+        256,
+        512,
+        1024,
+        1536,
+    ],  # Optimized chunk sizes corresponding to thresholds
+    "overlap": [0.5, 0.3, 0.2, 0.1],  # Overlap ratios to maintain context
 }
 
 # ------------------- Debugging & Performance Logging -------------------
