@@ -1,0 +1,3 @@
+# ChatRagi - AI-Powered Local RAG Chatbot
+
+ChatRagi is a locally running **Retrieval-Augmented Generation (RAG)** chatbot that integrates **LLM-based embeddings, vector search (ChromaDB), and Flask** to deliver intelligent responses based on indexed documents and conversational memory. It features a **user-friendly web UI**, **memory retrieval**, and **adaptive text chunking** for efficient document processing.

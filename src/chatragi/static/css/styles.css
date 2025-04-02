@@ -1,0 +1,310 @@
+/* ---------- Global Reset & Base Styling ---------- */
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f2f5;
+}
+
+/* Ensure Chat Container Doesn't Shift */
+html {
+    overflow-y: scroll;  /* Always show scrollbar */
+}
+
+/* Ensure h2 has proper spacing */
+h2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ---------- Chat Container ---------- */
+#chat-container {
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* ---------- Chat Box Styling ---------- */
+#chat-box {
+    height: 400px;
+    overflow-y: auto;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #fafafa;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* ---------- User & AI Message Styling ---------- */
+#chat-box .user-message {
+    background-color: #dff3ff;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 10px 10px 0 10px;
+    max-width: 80%;
+    align-self: flex-end;
+    word-wrap: break-word;
+    display: inline-block;
+}
+
+#chat-box .ai-message {
+    background-color: #f4f4f4;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 10px 10px 10px 0;
+    max-width: 80%;
+    align-self: flex-start;
+    word-wrap: break-word;
+    display: inline-block;
+}
+
+/* ---------- Markdown & Code Block Styling ---------- */
+#chat-box code {
+    background-color: #f0f0f0;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: #d6336c;
+    display: inline-block;
+    margin: 2px 0;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ---------- Block-Level Code Styling ---------- */
+#chat-box pre {
+    background-color: #272822;
+    color: #f8f8f2;
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    border: 1px solid #444;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 10px 0;
+}
+
+/* Custom scrollbar for code blocks */
+#chat-box pre::-webkit-scrollbar {
+    height: 6px;
+}
+
+#chat-box pre::-webkit-scrollbar-thumb {
+    background-color: #666;
+    border-radius: 3px;
+}
+
+#chat-box pre::-webkit-scrollbar-thumb:hover {
+    background-color: #444;
+}
+
+/* ---------- User Input Field ---------- */
+/* Input Container */
+#input-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* User Input Box */
+#user-input {
+    flex: 1;
+    padding: 12px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 8px 0 0 8px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+#user-input:focus {
+    border-color: #007bff;
+}
+
+/* ---------- Button Styling ---------- */
+
+/* Send Button */
+#send-btn {
+    padding: 12px 16px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    font-size: 18px;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#send-btn:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+/* Button Group Styling */
+.button-group {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.button-group button {
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.button-group button:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+.button-group button i {
+    margin-right: 6px;
+}
+
+/* Optional: Reduce spacing for last button */
+.button-group button:last-child {
+    margin-right: 0;
+}
+
+/* ---------- Memory & Source Containers ---------- */
+#memory-container,
+#source-container {
+    height: 500px;
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    font-size: 14px;
+}
+
+/* Shared container style for memory and source panels */
+.container-slide {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    margin-top: 20px;         /* Even spacing from chat container */
+    padding: 15px 20px;       /* Optional: match chat-box padding */
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+/* Header for memory and source panels */
+.container-slide h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+/* Make visible when toggled */
+.container-slide.active {
+    max-height: 1000px;
+    opacity: 1;
+}
+
+/* Memory & Source Box Styling */
+#memory-box,
+#source-box {
+    height: 400px;
+    overflow-y: auto;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #fafafa;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Close Buttons for Memory & Source */
+#close-memory-btn,
+#close-doc-btn {
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background-color: #dc3545;
+    color: white;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+#close-memory-btn:hover,
+#close-doc-btn:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+
+/* Memory & Source Entry Divider */
+#memory-box hr,
+#source-box hr {
+    margin: 15px 0;
+    border: none;
+    border-top: 1px solid #ccc;
+}
+
+/* ---------- Chat Scrollbar Styling ---------- */
+#chat-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chat-box::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#chat-box::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+#chat-box::-webkit-scrollbar-thumb:hover {
+    background: #a0a0a0;
+}
+
+/* Align headers and close icons in panel containers */
+.container-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  /* Modern icon-style close button */
+  .icon-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  
+  .icon-btn:hover {
+    color: #333;
+  }
+  
+  /* Make chat container sticky on scroll */
+  #chat-container {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #fff;
+  }

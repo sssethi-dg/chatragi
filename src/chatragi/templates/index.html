@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChatRagi - Local RAG Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div id="chat-container">
+        <h1>ChatRagi</h1>
+        <div id="chat-box"></div>
+
+        <!-- Input container to align text box & button properly -->
+        <div id="input-container">
+            <input type="text" id="user-input" placeholder="Ask me anything..." autocomplete="off">
+            <button id="send-btn">
+                <i class="fa-solid fa-paper-plane"></i>  <!-- Send Icon -->
+            </button>
+        </div>
+
+        <!-- Button Group for Actions -->
+        <div class="button-group">
+            <button id="show-memory-btn"><i class="fa-solid fa-clock-rotate-left"></i> Show Memory</button>
+            <button id="show-doc-list"><i class="fa-solid fa-list"></i> List Sources</button>
+            <button id="refresh-btn"><i class="fa-solid fa-sync"></i> Refresh Index</button>
+            <button id="clear-chat-btn"><i class="fa-solid fa-trash"></i> Clear Chat</button>
+        </div>
+    </div>
+    
+    <!-- Memory Container -->
+    <div id="memory-container" class="container-slide">
+        <h2>Chat Memory
+            <button id="close-memory-btn"><i class="fa-sharp fa-solid fa-circle-xmark"></i> Hide Memory</button>
+        </h2>    
+        <div id="memory-box"></div>
+    </div>
+
+    <!-- Source Document Container -->
+    <div id="source-container" class="container-slide">
+        <h2>Source Documents
+            <button id="close-doc-btn"><i class="fa-sharp fa-solid fa-circle-xmark"></i> Hide Source</button>
+        </h2>
+        <div id="source-box"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/scripts.js')}}"></script>
+</body>
+</html>

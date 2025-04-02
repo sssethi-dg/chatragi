@@ -1,0 +1,11 @@
+README.md
+pyproject.toml
+chatragi.egg-info/PKG-INFO
+chatragi.egg-info/SOURCES.txt
+chatragi.egg-info/dependency_links.txt
+chatragi.egg-info/requires.txt
+chatragi.egg-info/top_level.txt
+src/__init__.py
+src/app.py
+src/config.py
+src/file_watcher.py
