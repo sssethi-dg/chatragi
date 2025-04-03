@@ -1,0 +1,20 @@
+num_gpu_layers,response_time_sec,response_preview,phi4:latest
+1,1.82,"Quantum physics is the study of how particles and energy behave at the smallest scales, where they c"
+10,5.3,"Quantum physics is the study of how tiny particles like atoms and photons behave, often in ways that"
+20,1.44,"Quantum physics is the study of the very small, where particles can exist in multiple states at once"
+30,20.02,"Quantum physics is the study of how nature works at the smallest scales, such as atoms and subatomic"
+num_gpu_layers,response_time_sec,response_preview,gemma3:12b
+1,9.36,Quantum physics describes how incredibly tiny things like atoms and particles behave in strange and 
+10,1.55,"Quantum physics is the study of how incredibly tiny things like atoms and particles behave, and they"
+20,1.53,"Quantum physics is the study of how incredibly tiny things like atoms and particles behave, and they"
+30,1.53,"Quantum physics is the study of how incredibly tiny things like atoms and particles behave, and they"
+num_gpu_layers,response_time_sec,response_preview,gemma3:27b
+1,19.53,"Quantum physics is the study of how *really* small things (like atoms) behave, and it turns out they"
+10,4.6,Quantum physics is the study of how really tiny things (like atoms and the particles within them) be
+20,4.56,Quantum physics is the study of how incredibly tiny things (like atoms and the particles within them
+30,4.59,"Quantum physics is the study of how *really* small things behave, and it turns out they don't follow"
+num_gpu_layers,response_time_sec,response_preview,phi4:latest
+1,16.19,Reciprocal tariffs are a type of trade policy where two countries agree to impose equivalent or simi
+10,7.97,Reciprocal tariffs are a trade policy tool where two countries agree to impose equivalent taxes or d
+20,10.93,Reciprocal tariffs are essentially a trade practice where two countries agree to impose similar leve
+30,9.06,Reciprocal tariffs are essentially a trade agreement between two countries where each country agrees

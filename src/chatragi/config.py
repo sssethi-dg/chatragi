@@ -50,7 +50,7 @@ try:
     LLM_MODEL = Ollama(
         model=LLM_MODEL_NAME,
         request_timeout=360.00,
-        options={"num_gpu_layers": 1, "quantization": "4bit"},
+        options={"num_gpu_layers": 20, "quantization": "4bit"},
     )
     logger.info("LLM model loaded: %s", LLM_MODEL_NAME)
 except Exception as e:
