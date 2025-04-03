@@ -12,6 +12,9 @@ logs/
 *.log
 .env
 
+# Ignore build artifacts
+*.egg-info/
+
 # Runtime and App Storage
 archive/
 data/
