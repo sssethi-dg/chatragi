@@ -13,7 +13,7 @@ GPU_LAYER_OPTIONS = [1, 10, 20, 30]
 TEST_PROMPT = "In simple terms explain the concept of reciprocal tariffs."
 
 # Name of the model to benchmark; must already be pulled via `ollama pull <model-name>`.
-LLM_MODEL_NAME = "phi4:latest"  # Options: "phi4:latest", "gemma3:27b", "gemma3:12b"
+LLM_MODEL_NAME = "phi4:latest"  # Options: "gemma3:27b", "gemma3:12b"
 
 # Output file where benchmarking results will be stored.
 CSV_FILENAME = "gpu_layer_benchmark_results.csv"
