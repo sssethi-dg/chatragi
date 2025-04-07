@@ -10,13 +10,13 @@ from langchain_ollama import OllamaLLM
 GPU_LAYER_OPTIONS = [1, 10, 20, 30]
 
 # Prompt sent to the model for performance comparison.
-TEST_PROMPT = "In simple terms explain the concept of reciprocal tariffs."
+TEST_PROMPT = "Give me a one-line explanation of quantum physics in simple terms."
 
 # Name of the model to benchmark; must already be pulled via `ollama pull <model-name>`.
 LLM_MODEL_NAME = "phi4:latest"  # Options: "gemma3:27b", "gemma3:12b"
 
 # Output file where benchmarking results will be stored.
-CSV_FILENAME = "gpu_layer_benchmark_results.csv"
+CSV_FILENAME = "./results/gpu_layer_benchmark_results.csv"
 
 
 def benchmark_model_response():
