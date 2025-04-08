@@ -1,7 +1,7 @@
 
 Follow the steps listed below to set up **phi4** and **nomic-embed-text**, or any other open-source model supported by **Ollama** on your local machine.
 
-**Step 1: Download and Install Ollama**
+#### Step 1: Download and Install Ollama
 1. **Visit the Ollama Website:**
 	-  Open your browser and navigate to [https://ollama.com/download](https://ollama.com/download)
 2. **Select the Appropriate Version:**
@@ -12,7 +12,8 @@ Follow the steps listed below to set up **phi4** and **nomic-embed-text**, or an
 4. **Verify Installation:**
 	- After installation, look for the Ollama icon/logo in the status bar to confirm successful setup.
 
-**Step 2: Add Microsoft Phi-4 Using the Terminal**
+---
+####  Step 2: Add Microsoft Phi-4 Using the Terminal
 1. **Visit the Ollama Library:**
 	- Open your browser and go to the [Ollama Library](https://ollama.com/library).
 2. **Select the Model:**
@@ -28,8 +29,8 @@ ollama run phi4
 ```
 /bye
 ```
-
-**Step 3: Add NOMIC nomic-embed-text Using the Terminal**
+---
+#### Step 3: Add NOMIC nomic-embed-text Using the Terminal
 1. **Visit the Ollama Library:**
 	- Open your browser and go to the [Ollama Library](https://ollama.com/library).
 2. **Select the Model:**
@@ -45,6 +46,6 @@ ollama pull nomic-embed-text
 ```
 /bye
 ```
-
-> [!tip] Optional  
-    > If you prefer to run smaller models locally, check out the list of available models listed on the [Ollama's website](https://ollama.com/search)
+---
+#### Optional  
+If you prefer to run smaller models locally, check out the list of available models listed on the [Ollama's website](https://ollama.com/search)
