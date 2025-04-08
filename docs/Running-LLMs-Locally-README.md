@@ -1,4 +1,4 @@
-
+# Running LLMs Locally
 Follow the steps listed below to set up **phi4** and **nomic-embed-text**, or any other open-source model supported by **Ollama** on your local machine.
 
 #### Step 1: Download and Install Ollama

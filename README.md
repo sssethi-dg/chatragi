@@ -15,7 +15,7 @@
 ---
 > 📖 For additional project documentation, refer to the **docs/** folder.
 
-> ⚠️ Before continuing, make sure to complete the setup steps in **[[docs/Setting-LLM-README.md|docs/Setting-LLM-README.md]]** to configure **phi4**, **nomic-embed-text**, or any other Ollama-supported open-source model on your local machine.
+> ⚠️ Before continuing, make sure to complete the setup steps in **[[docs/Running-LLMs-Locally-README.md|Running LLMs Locally]]** README file to configure **phi4**, **nomic-embed-text**, or any other Ollama-supported open-source model on your local machine.
 
 ---
 ##### Project Structure
@@ -29,20 +29,20 @@ chatragi/
 │   ├── utils/            # Logic for chatbot, memory, database, logging
 │   ├── templates/        # Flask HTML templates
 │   └── static/           # JS and CSS assets
-├── chroma_db/            # 🟡 Auto-generated: Local ChromaDB vector store
-├── data/                 # 🟡 Auto-generated: Input files for ingestion
-├── archive/              # 🟡 Auto-generated: Processed files archive
+├── chroma_db/            # ✨ Auto-generated: Local ChromaDB vector store
+├── data/                 # ✨ Auto-generated: Input files for ingestion
+├── archive/              # ✨ Auto-generated: Processed files archive
 ├── docs/                 # Guides, architecture docs, and setup references
 ├── notebooks/            # Dev/test notebooks
-├── logs/                 # 🟡 Auto-generated: Runtime logs
-├── storage/              # 🟡 Auto-generated: Output and session data
+├── logs/                 # ✨ Auto-generated: Runtime logs
+├── storage/              # ✨ Auto-generated: Output and session data
 ├── test/                 # Unit and integration tests
 ├── .gitignore
 ├── .pre-commit-config.yaml
 ├── pyproject.toml
 └── README.md
 
-🟡 Note: These folders are created automatically on first run.
+✨ Note: These folders are created automatically on first run.
 ```
 
 ---
@@ -94,6 +94,8 @@ INFO - ChatRagi - Watching ".../chatragi/data" for new files...
 - Moves processed files to the archive/ folder.
 
 To stop the service, press **Ctrl + C**.
+
+For additional details, please refer to **[[docs/File-Watcher-README.md|File Watcher]]** README file.
 
 ---
 #### Run the Web Chatbot
