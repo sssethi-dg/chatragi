@@ -1,23 +1,11 @@
 # ChatRagi — AI-Powered Local RAG Chatbot
+
 ![Python Version](https://img.shields.io/badge/python-3.8+-blue?logo=python&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
 **ChatRagi** is a fully local **Retrieval-Augmented Generation (RAG)** chatbot that combines **LLM-based embeddings**, **ChromaDB for vector search**, and **Flask** to deliver context-aware responses based on indexed documents and memory.
 
-It features:
-- ⚡ Adaptive text chunking for fast and relevant retrieval
-- 💬 A user-friendly web interface for chatting
-- 🧠 Conversational memory using local embeddings
-
-> **Built & tested on:** 2022 Mac Studio, **M1 Max** processor, **32 GB RAM**
-
-> 📖 For additional project documentation, refer to the `docs/` folder.
-
-> ⚠️ Before continuing, make sure to complete the setup steps in `docs/Setting-LLM-README.md` to configure **phi4**, **nomic-embed-text**, or any other Ollama-supported open-source model on your local machine.
-
----
-### Features
-
+#### Features
 - 🔍 **Document Ingestion**: Load and parse PDF, CSV, TXT, JSON, or Markdown files into ChromaDB.
 - 💬 **Chat Interface**: Interact with your documents using LLMs and contextual memory.
 - 📊 **Embeddings + Retrieval**: Embedding models generate semantic context for smarter search.
@@ -25,7 +13,12 @@ It features:
 - 🌐 **Web UI**: Built with HTML, CSS, and JS for local interaction.
 
 ---
-### Project Structure
+> 📖 For additional project documentation, refer to the **docs/** folder.
+
+> ⚠️ Before continuing, make sure to complete the setup steps in **[[docs/Setting-LLM-README.md|docs/Setting-LLM-README.md]]** to configure **phi4**, **nomic-embed-text**, or any other Ollama-supported open-source model on your local machine.
+
+---
+##### Project Structure
 
 ```bash
 chatragi/
@@ -49,14 +42,16 @@ chatragi/
 ├── pyproject.toml
 └── README.md
 
-🟡 *Note: These folders are created automatically on first run.*
+🟡 Note: These folders are created automatically on first run.
 ```
+
 ---
-### Setup Instructions
-**Clone and install dependencies**
+#### Setup Instructions
+> Built & tested on: 2022 Mac Studio, M1 Max processor, 32 GB RAM
+
+**Clone and install dependencies:**
 
 ```shell
-
 git clone https://github.com/your-username/chatragi.git
 cd chatragi
 
@@ -72,11 +67,11 @@ pip install -e .
 
 # (Optional) Install dev tools
 pip install -e '.[dev]'
-
 ```
 
 ---
-### Document Ingestion Service
+#### Document Ingestion Service
+
 Run the file watcher to process documents automatically:
 
 ```shell
@@ -101,22 +96,23 @@ INFO - ChatRagi - Watching ".../chatragi/data" for new files...
 To stop the service, press **Ctrl + C**.
 
 ---
-### Run the Web Chatbot
+#### Run the Web Chatbot
 
 ```shell
 python3 src/chatragi/app.py
 ```
 
 Sample terminal output:
+
 ```text
 INFO - ChatRagi - Refreshing index...
 INFO - ChatRagi - Index is ready.
- * Running on http://127.0.0.1:5000
+* Running on http://127.0.0.1:5000
 ```
 
 Then open your browser and go to:
-👉 [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
+👉 [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 ---
 **Author:** [Simer Singh Sethi](mailto:simer@disruptivegeek.net)
