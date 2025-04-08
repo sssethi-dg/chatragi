@@ -15,7 +15,7 @@
 ---
 > 📖 For additional project documentation, refer to the **docs/** folder.
 
-> ⚠️ Before continuing, make sure to complete the setup steps in **[[docs/Running-LLMs-Locally-README.md|Running LLMs Locally]]** README file to configure **phi4**, **nomic-embed-text**, or any other Ollama-supported open-source model on your local machine.
+> ⚠️ Before continuing, make sure to complete the setup steps in **[Running LLMs Locally](docs/Running-LLMs-Locally-README.md)** README file to configure **phi4**, **nomic-embed-text**, or any other Ollama-supported open-source model on your local machine.
 
 ---
 ##### Project Structure
@@ -95,7 +95,7 @@ INFO - ChatRagi - Watching ".../chatragi/data" for new files...
 
 To stop the service, press **Ctrl + C**.
 
-For additional details, please refer to **[[docs/File-Watcher-README.md|File Watcher]]** README file.
+For additional details, please refer to **[File Watcher](docs/File-Watcher-README.md)** README file.
 
 ---
 #### Run the Web Chatbot
