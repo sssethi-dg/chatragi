@@ -95,7 +95,7 @@ INFO - ChatRagi - Watching ".../chatragi/data" for new files...
 - Indexes chunks into ChromaDB.
 - Moves processed files to the archive/ folder.
 
-To stop the service, press **Ctrl + C**.
+🛑 To stop the service, press **Ctrl + C**.
 
 For additional details, please refer to **[File Watcher](docs/File-Watcher-README.md)** README file.
 
@@ -122,7 +122,7 @@ INFO - ChatRagi - Index is ready.
 
 ![Chatbot Web Page](images/ChatRagi-WebPage.png)
 
-To stop the Chatbot App, press **Ctrl + C**.
+🛑 To stop the Chatbot App, press **Ctrl + C**.
 
 For additional details, please refer to **[App](docs/App-README.md)** README file.
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chatragi"
-version = "0.0.1"
+version = "1.0.0"
 authors = [
   { name = "Simer Singh Sethi", email = "simer@disruptivegeek.net" }
 ]
