@@ -47,6 +47,7 @@ chatragi/
 
 ---
 #### Setup Instructions
+
 > Built & tested on: 2022 Mac Studio, M1 Max processor, 32 GB RAM
 
 **Clone and install dependencies:**
@@ -72,16 +73,12 @@ pip install -e '.[dev]'
 ---
 #### Document Ingestion Service
 
-![Document Ingestion Service](images/Chatragi-Data-Ingestion.png)
-
-Run the file watcher to process documents automatically:
-
+**Run the file watcher to process documents automatically:**
 ```shell
 python3 src/chatragi/file_watcher.py
 ```
 
-You should see output similar to:
-
+**You should see output similar to:**
 ```text
 INFO - ChatRagi - Successfully connected to ChromaDB!
 INFO - ChatRagi - Starting File Watcher Service...
@@ -89,6 +86,9 @@ INFO - ChatRagi - Watching ".../chatragi/data" for new files...
 ```
 
 **How it works:**
+
+![Document Ingestion Service](images/Chatragi-Data-Ingestion.png)
+
 - Supported formats: pdf, csv, txt, json, md
 - Monitors the data/ folder for new files.
 - Validates file integrity before processing.
@@ -102,23 +102,31 @@ For additional details, please refer to **[File Watcher](docs/File-Watcher-READM
 ---
 #### Run the Web Chatbot
 
+This module implements the web backend for the ChatRagi chatbot. It sets up several HTTP endpoints to serve the chatbot's home page, process user queries, store conversation memories, refresh the document index, and list stored documents and memories.
+
 ![Web Chatbot](images/Chatragi-WebChatbot.png)
 
+**Running the App:**
 ```shell
 python3 src/chatragi/app.py
 ```
 
-Sample terminal output:
-
+**Sample terminal output:**
 ```text
 INFO - ChatRagi - Refreshing index...
 INFO - ChatRagi - Index is ready.
 * Running on http://127.0.0.1:5000
 ```
 
-Then open your browser and go to:
-
+**Then open your browser and go to:**
 👉 [http://127.0.0.1:5000](http://127.0.0.1:5000)
+
+
+![Chatbot Web Page](images/ChatRagi-WebPage.png)
+
+To stop the Chatbot App, press **Ctrl + C**.
+
+For additional details, please refer to **[App](docs/App-README.md)** README file.
 
 ---
 **Author:** [Simer Singh Sethi](mailto:simer@disruptivegeek.net)

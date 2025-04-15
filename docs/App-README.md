@@ -78,7 +78,7 @@ All endpoints are wrapped in a custom error handler that returns structured JSON
 python3 src/chatragi/app.py
 ```
 
-Sample Output:
+**Sample Output:**
 
 ```text
 INFO - ChatRagi - Refreshing index...
@@ -87,6 +87,10 @@ INFO - ChatRagi - Index is ready.
 ```
 
 Visit [http://127.0.0.1:5000](http://127.0.0.1:5000) in your browser.
+
+![Chatbot Web Page](/images/ChatRagi-WebPage.png)
+
+To stop the Cahtbot App, press **Ctrl + C**.
 
 ---
 ##### Development Notes
