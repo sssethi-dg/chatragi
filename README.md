@@ -5,7 +5,7 @@
 
 **ChatRagi** is a fully local **Retrieval-Augmented Generation (RAG)** chatbot that combines **LLM-based embeddings**, **ChromaDB for vector search**, and **Flask** to deliver context-aware responses based on indexed documents and memory.
 
-#### Features
+### Features
 - 🔍 **Document Ingestion**: Load and parse PDF, CSV, TXT, JSON, or Markdown files into ChromaDB.
 - 💬 **Chat Interface**: Interact with your documents using LLMs and contextual memory.
 - 📊 **Embeddings + Retrieval**: Embedding models generate semantic context for smarter search.
@@ -18,7 +18,7 @@
 > ⚠️ Before continuing, make sure to complete the setup steps in **[Running LLMs Locally](docs/Running-LLMs-Locally-README.md)** README file to configure **phi4**, **nomic-embed-text**, or any other Ollama-supported open-source model on your local machine.
 
 ---
-##### Project Structure
+### Project Structure
 
 ```bash
 chatragi/
@@ -46,7 +46,7 @@ chatragi/
 ```
 
 ---
-#### Setup Instructions
+### Setup Instructions
 
 > Built & tested on: 2022 Mac Studio, M1 Max processor, 32 GB RAM
 
@@ -71,7 +71,7 @@ pip install -e '.[dev]'
 ```
 
 ---
-#### Document Ingestion Service
+### Document Ingestion Service
 
 **Run the file watcher to process documents automatically:**
 ```shell
@@ -100,7 +100,7 @@ To stop the service, press **Ctrl + C**.
 For additional details, please refer to **[File Watcher](docs/File-Watcher-README.md)** README file.
 
 ---
-#### Run the Web Chatbot
+### Run the Web Chatbot
 
 This module implements the web backend for the ChatRagi chatbot. It sets up several HTTP endpoints to serve the chatbot's home page, process user queries, store conversation memories, refresh the document index, and list stored documents and memories.
 
@@ -118,9 +118,7 @@ INFO - ChatRagi - Index is ready.
 * Running on http://127.0.0.1:5000
 ```
 
-**Then open your browser and go to:**
-👉 [http://127.0.0.1:5000](http://127.0.0.1:5000)
-
+**Then open your browser and go to:** 🌐 [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 ![Chatbot Web Page](images/ChatRagi-WebPage.png)
 
