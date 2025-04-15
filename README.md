@@ -72,7 +72,7 @@ pip install -e '.[dev]'
 ---
 #### Document Ingestion Service
 
-![[images/Chatragi-Data-Ingestion.png]]
+![[./images/Chatragi-Data-Ingestion.png]]
 
 Run the file watcher to process documents automatically:
 
