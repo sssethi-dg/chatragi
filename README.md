@@ -72,7 +72,7 @@ pip install -e '.[dev]'
 ---
 #### Document Ingestion Service
 
-![[./images/Chatragi-Data-Ingestion.png]]
+![Document Ingestion Service](images/Chatragi-Data-Ingestion.png)
 
 Run the file watcher to process documents automatically:
 
@@ -102,7 +102,7 @@ For additional details, please refer to **[File Watcher](docs/File-Watcher-READM
 ---
 #### Run the Web Chatbot
 
-![[images/Chatragi-WebChatbot.png]]
+![Web Chatbot](images/Chatragi-WebChatbot.png)
 
 ```shell
 python3 src/chatragi/app.py
