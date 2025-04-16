@@ -1,7 +1,7 @@
 # Chat-Memory
 
 #### Overview
-The Chat Memory module is a key component of the ChatRagi chatbot application. Its purpose is to store, retrieve, and manage previous interactions between the user and the chatbot. By recalling relevant past conversations, the chatbot can provide more informed and context-aware responses.
+The **chat_memory.py** is a key component of the ChatRagi chatbot application. Its purpose is to store, retrieve, and manage previous interactions between the user and the chatbot. By recalling relevant past conversations, the chatbot can provide more informed and context-aware responses.
 
 ---
 #### Key Features

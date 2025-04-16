@@ -1,7 +1,7 @@
 # Chatbot
 
 #### Overview
-The ChatRagi Chatbot application is designed to help users interact with a large collection of documents using natural language queries. The system indexes documents using advanced machine learning techniques, allowing the chatbot to retrieve relevant passages and provide informed responses.
+The **chatbot.py** application is designed to help users interact with a large collection of documents using natural language queries. The system indexes documents using advanced machine learning techniques, allowing the chatbot to retrieve relevant passages and provide informed responses.
 
 ---
 #### How it Works?

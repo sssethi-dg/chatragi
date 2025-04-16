@@ -1,24 +1,28 @@
 # ChatRagi — AI-Powered Local RAG Chatbot
 
 ![Python Version](https://img.shields.io/badge/python-3.8+-blue?logo=python&logoColor=white)
+
 ![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
-**ChatRagi** is a fully local **Retrieval-Augmented Generation (RAG)** chatbot that combines **LLM-based embeddings**, **ChromaDB for vector search**, and **Flask** to deliver context-aware responses based on indexed documents and memory.
+**ChatRagi** is a fully local **Retrieval-Augmented Generation (RAG)** chatbot framework that integrates LLM-based embeddings, ChromaDB for vector search, and a Flask web app to deliver context-aware responses based on indexed documents and conversational memory.
 
-### Features
-- 🔍 **Document Ingestion**: Load and parse PDF, CSV, TXT, JSON, or Markdown files into ChromaDB.
-- 💬 **Chat Interface**: Interact with your documents using LLMs and contextual memory.
-- 📊 **Embeddings + Retrieval**: Embedding models generate semantic context for smarter search.
-- 🔧 **Modular Utilities**: Clean architecture for memory, indexing, chat logic, and error handling.
-- 🌐 **Web UI**: Built with HTML, CSS, and JS for local interaction.
+## Features
+
+- **Document Ingestion**: Parses and indexes PDFs, CSVs, TXT, JSON, and Markdown files into ChromaDB.
+- **Chat Interface**: Enables local interaction with your documents using LLMs and memory-aware responses.
+- **Embeddings + Retrieval**: Leverages embedding models for semantically rich search.
+- **Modular Utilities**: Clean separation for memory, document ingestion, chat logic, and logging.
+- **Local Web UI**: A lightweight front end built with HTML, CSS, and JS for interacting with your knowledge base.
 
 ---
+## Quick Links
+
 > 📖 For additional project documentation, refer to the **docs/** folder.
 
 > ⚠️ Before continuing, make sure to complete the setup steps in **[Running LLMs Locally](docs/Running-LLMs-Locally-README.md)** README file to configure **phi4**, **nomic-embed-text**, or any other Ollama-supported open-source model on your local machine.
 
 ---
-### Project Structure
+## Project Structure
 
 ```bash
 chatragi/
@@ -42,16 +46,15 @@ chatragi/
 ├── pyproject.toml
 └── README.md
 
-✨ Note: These folders are created automatically on first run.
+✨ Note: These folders are auto-generated when the app is run for the first time.
 ```
 
 ---
-### Setup Instructions
+## Setup Instructions
 
 > Built & tested on: 2022 Mac Studio, M1 Max processor, 32 GB RAM
 
-**Clone and install dependencies:**
-
+### Clone and install dependencies:
 ```shell
 git clone https://github.com/your-username/chatragi.git
 cd chatragi
@@ -71,23 +74,25 @@ pip install -e '.[dev]'
 ```
 
 ---
-### Document Ingestion Service
+## Document Ingestion Service
 
-**Run the file watcher to process documents automatically:**
+ChatRagi includes a file watcher that automatically processes and indexes new documents placed in the data/ folder.
+
+### Start the service:
 ```shell
 python3 src/chatragi/file_watcher.py
 ```
 
-**You should see output similar to:**
+### Sample output:
 ```text
 INFO - ChatRagi - Successfully connected to ChromaDB!
 INFO - ChatRagi - Starting File Watcher Service...
 INFO - ChatRagi - Watching ".../chatragi/data" for new files...
 ```
 
-**How it works:**
+### How it works?
 
-![Document Ingestion Service](images/Chatragi-Data-Ingestion.png)
+![Document Ingestion Service](docs/assets/Chatragi-Data-Ingestion.png)
 
 - Supported formats: pdf, csv, txt, json, md
 - Monitors the data/ folder for new files.
@@ -100,31 +105,33 @@ INFO - ChatRagi - Watching ".../chatragi/data" for new files...
 For additional details, please refer to **[File Watcher](docs/File-Watcher-README.md)** README file.
 
 ---
-### Run the Web Chatbot
+## Web Chatbot
 
-This module implements the web backend for the ChatRagi chatbot. It sets up several HTTP endpoints to serve the chatbot's home page, process user queries, store conversation memories, refresh the document index, and list stored documents and memories.
+The Flask backend provides several endpoints to power the chatbot UI and RAG logic.
 
-![Web Chatbot](images/Chatragi-WebChatbot.png)
+![Web Chatbot](docs/assets/Chatragi-WebChatbot.png)
 
-**Running the App:**
+### Start the web app:
 ```shell
 python3 src/chatragi/app.py
 ```
 
-**Sample terminal output:**
+### Sample terminal output:
 ```text
 INFO - ChatRagi - Refreshing index...
 INFO - ChatRagi - Index is ready.
 * Running on http://127.0.0.1:5000
 ```
 
-**Then open your browser and go to:** 🌐 [http://127.0.0.1:5000](http://127.0.0.1:5000)
+**Open your browser:** 🌐 [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
-![Chatbot Web Page](images/ChatRagi-WebPage.png)
+![Chatbot Web Page](docs/assets/ChatRagi-WebPage.png)
 
 🛑 To stop the Chatbot App, press **Ctrl + C**.
 
 For additional details, please refer to **[App](docs/App-README.md)** README file.
 
 ---
-**Author:** [Simer Singh Sethi](mailto:simer@disruptivegeek.net)
+## Maintainer
+
+Developed and maintained by [Simer Singh Sethi](mailto:simer@disruptivegeek.net)
