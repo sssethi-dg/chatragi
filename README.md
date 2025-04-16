@@ -46,7 +46,7 @@ chatragi/
 ├── pyproject.toml
 └── README.md
 
-✨ Note: These folders are auto-generated when the app is run for the first time.
+# ✨ Note: These folders are auto-generated when the app is run for the first time.
 ```
 
 ---
@@ -56,7 +56,7 @@ chatragi/
 
 ### Clone and install dependencies:
 ```shell
-git clone https://github.com/your-username/chatragi.git
+git clone https://github.com/sssethi-dg/chatragi.git
 cd chatragi
 
 # Create and activate a virtual environment
