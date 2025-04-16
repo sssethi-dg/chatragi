@@ -132,6 +132,11 @@ INFO - ChatRagi - Index is ready.
 For additional details, please refer to **[App](docs/App-README.md)** README file.
 
 ---
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+---
 ## Maintainer
 
 Developed and maintained by [Simer Singh Sethi](mailto:simer@disruptivegeek.net)
