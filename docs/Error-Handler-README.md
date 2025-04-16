@@ -1,10 +1,12 @@
 # Error-Handler - Configuration File
 
-#### Overview
+## Overview
+
 The **error_handler.py** file is a key component of the ChatRagi application that ensures a consistent and secure way to handle unexpected errors. Its main functions are to record error details for technical review and to provide a simple error message to the user when something goes wrong.
 
 ---
-#### How it Works?
+## How it Works?
+
 1. **Logging the Error:**
 When an error occurs, the error handler captures the exception details, including a traceback, and writes this information to a log file. This helps the technical team diagnose and resolve issues without exposing sensitive information to users.
 2. **Returning a Standardized Response:**
@@ -13,7 +15,8 @@ Instead of displaying complex error details to the user, the error handler sends
 By centralizing error handling in one module, the application can uniformly manage errors across all its Flask routes. This makes the application more robust and easier to maintain.
   
 ---
-#### Benefits
+## Benefits
+
 - **Enhanced Reliability:**
 The application can gracefully handle unexpected issues without crashing.
 - **Efficient Troubleshooting:**

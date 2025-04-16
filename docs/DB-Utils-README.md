@@ -1,10 +1,12 @@
 # DB-Utils
 
-#### Overview
+## Overview
+
 The **db_utils.py** module provides utility functions to manage the database for the ChatRagi chatbot application. It connects to the ChromaDB database and manages tasks such as cleaning up outdated chatbot conversations, listing indexed documents, and deleting specific documents.
 
 ---
-#### Key Functions
+## Key Functions
+
 1. **delete_non_important_memories**
 	This function removes chatbot memories that are older than a specified number of days (defined by the configuration) unless they are marked as important. This ensures that the database does not become overloaded with old or unnecessary data.
 2. **log_indexed_documents**
@@ -17,7 +19,8 @@ The **db_utils.py** module provides utility functions to manage the database for
 	This function deletes a specific document from the database by its filename. This is useful for removing outdated or unwanted documents from the index.
 
 ---
-#### How it Works?
+## How it Works?
+
 - **Initialization:**
 	Upon startup, the module attempts to connect to the ChromaDB database. If the connection is successful, it creates or retrieves collections for chatbot memory and document indexing.
 - **Memory Management:**
@@ -28,6 +31,7 @@ The **db_utils.py** module provides utility functions to manage the database for
 	All operations are logged using a centralized logging configuration. This includes successful operations and any errors encountered during database interactions, which aids in troubleshooting and maintenance.
 
 ---
-#### Summary
+## Summary
+
 The **db_utils.py** module is a crucial part of the ChatRagi application, as it handles all interactions with the database. It ensures efficient memory and document management while providing clear logging for monitoring system health. This design helps maintain a clean and well-organized database, which in turn supports the overall performance and reliability of the chatbot application.
 

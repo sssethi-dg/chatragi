@@ -1,17 +1,20 @@
 # Document-Loader
 
-#### Overview
+## Overview
+
 The **document_loader.py** module is a key component of the ChatRagi project. Its primary purpose is to ingest documents of various types (such as PDF, CSV, JSON, and TXT), split their content into smaller, manageable chunks, and enrich these chunks with metadata. The module also checks for duplicate documents by computing a unique hash for each file and its content. Processed files are moved to an archive folder to prevent repeated processing.
 
 ---
-#### Key Benefits
+## Key Benefits
+
 - **Automation:** Automatically ingests and processes new documents.
 - **Efficiency:** Splits large documents into manageable chunks for improved indexing performance.
 - **Duplicate Detection:** Uses file and chunk hashes to prevent redundant processing.
 - **Robustness:** Comprehensive logging and exception handling ensure reliable operation.
 
 ---
-#### How it Works?
+## How it Works?
+
 1. **Document Ingestion:**
 	The module supports several file formats. When a new document is provided, the corresponding loader function extracts the text content from the file.
 2. **Text Chunking:**

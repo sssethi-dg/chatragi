@@ -1,10 +1,12 @@
 # Chatbot
 
-#### Overview
+## Overview
+
 The **chatbot.py** application is designed to help users interact with a large collection of documents using natural language queries. The system indexes documents using advanced machine learning techniques, allowing the chatbot to retrieve relevant passages and provide informed responses.
 
 ---
-#### How it Works?
+## How it Works?
+
 1. **Index Initialization:**
 	When the application starts, it retrieves the document collection from a database (ChromaDB). If a previously built index exists, the system loads it; otherwise, it builds a new vector index from the documents. This index allows the chatbot to search for and retrieve relevant information efficiently.
 2. **Query Processing:**
@@ -15,7 +17,8 @@ The **chatbot.py** application is designed to help users interact with a large c
 	The application includes robust logging and exception handling to help developers diagnose issues quickly and ensure that the system remains stable even if errors occur.
 
 ---
-#### Benefits
+## Benefits
+
 - **Efficient Document Retrieval:**
 	The vector index enables fast and precise retrieval of relevant document passages, making the chatbot responsive and useful for various queries.
 - **Context-Aware Responses:**

@@ -1,11 +1,12 @@
 # Config - ChatRagi Configuration File
 
-#### Overview
+## Overview
 
 The **config.py** file is the central configuration module for the ChatRagi chatbot application. It sets up various parameters that control how the chatbot operates. These settings include file storage locations, artificial intelligence (AI) model selection, performance optimizations, and memory management. This document explains these configurations in simple terms.
 
 ---
-#### Key Sections and Their Purpose
+## Key Sections and Their Purpose
+
 1. **General Configuration**
 	This section defines where the application stores its data, archives processed files, persists chatbot knowledge, and logs activity. It ensures that required folders exist before the application starts.
 2. **LLM Model Configuration**
@@ -22,7 +23,7 @@ The **config.py** file is the central configuration module for the ChatRagi chat
 	If debug mode is enabled, the configuration prints detailed information about the settings being used. This information helps with troubleshooting and optimizing the chatbot.
 
 ---
-#### How it Works?
+## How it Works?
 
 - When ChatRagi starts, it reads **config.py** to initialize settings.
 - It checks for the existence of necessary folders and creates them if they do not exist.
@@ -31,5 +32,6 @@ The **config.py** file is the central configuration module for the ChatRagi chat
 - Finally, it configures parameters that control the behavior of the chatbot during runtime, such as how much text is processed at once and how many document chunks are retrieved during queries.
 
 ---
-#### Summary
+## Summary
+
 This configuration file is essential for ensuring that ChatRagi operates efficiently, accurately, and in a way that meets the performance requirements of the business.

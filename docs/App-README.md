@@ -7,7 +7,7 @@ The **app.py** module serves as the Flask backend for ChatRagi. It provides API 
 This module is the main entry point for running the web server.
 
 ---
-#### Core Responsibilities
+## Core Responsibilities
 
 - Serve the chatbot frontend (`index.html`)
 - Handle incoming user questions and route them to the AI engine
@@ -16,13 +16,13 @@ This module is the main entry point for running the web server.
 - Expose endpoints to list stored documents and conversation logs
 
 ---
-#### Routes and Endpoints
+## Routes and Endpoints
 
-#### `GET /`
+### `GET /`
 
 Renders the homepage interface using `templates/index.html`. This is the frontend where users type and submit their questions.
 
-#### `POST /ask`
+### `POST /ask`
 
 Processes a user query and returns a Markdown-formatted AI response.
 
@@ -33,7 +33,7 @@ Processes a user query and returns a Markdown-formatted AI response.
   - Generate a response using an LLM (via  LlamaIndex)
   - Store the interaction in the memory database
 
-#### `GET /list-documents`
+### `GET /list-documents`
 
 Returns a list of filenames of all documents currently indexed in ChromaDB.
 
@@ -43,7 +43,7 @@ Returns a list of filenames of all documents currently indexed in ChromaDB.
 }
 ```
 `
-#### **`GET /list-memories`**
+### **`GET /list-memories`**
 
 Returns stored chatbot interactions (query/response pairs).
 
@@ -59,27 +59,28 @@ Returns stored chatbot interactions (query/response pairs).
 }
 ```
 
-#### **`POST /refresh-index`**
+### **`POST /refresh-index`**
 
 Triggers a refresh of the vector index using existing documents from storage. This ensures the LLM has access to newly ingested files.
 
 ---
-#### Logging
+## Logging
+
 The app uses a centralized logging system (configured in logger_config.py) to log important runtime events, incoming requests, and errors. Logs are saved in the logs/ directory.
 
 ---
-#### Exception Handling
+## Exception Handling
+
 All endpoints are wrapped in a custom error handler that returns structured JSON error responses to clients, aiding in frontend error display and debugging.
 
 ---
-#### Running the App
+## Start the webb app
 
 ```shell
 python3 src/chatragi/app.py
 ```
 
-**Sample Output:**
-
+### Sample terminal Output:
 ```text
 INFO - ChatRagi - Refreshing index...
 INFO - ChatRagi - Index is ready.
@@ -88,17 +89,19 @@ INFO - ChatRagi - Index is ready.
 
 Visit [http://127.0.0.1:5000](http://127.0.0.1:5000) in your browser.
 
-![Chatbot Web Page](/images/ChatRagi-WebPage.png)
+![Chatbot Web Page](assets/ChatRagi-WebPage.png)
 
-To stop the Cahtbot App, press **Ctrl + C**.
+To stop the Chatbot App, press **Ctrl + C**.
 
 ---
-##### Development Notes
+### Development Notes
+
 - API responses are Markdown-formatted to support rich text rendering in the frontend.
 - Conversation memory is stored in ChromaDB with session metadata.
 - Index refresh logic is managed via llama_index integration.
 - To customize models or memory behavior, update chatbot.py and chat-memory.py.
 
 ---
-#### Summary
+## Summary
+
 The web backend provides the glue between ChatRagi’s user interface, its vector store (ChromaDB), and local language models. It’s designed to be lightweight, extensible, and production-ready with robust logging, error handling, and a clean API surface.

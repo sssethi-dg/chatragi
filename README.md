@@ -4,6 +4,8 @@
 
 ![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen?style=flat-square)
+
 **ChatRagi** is a fully local **Retrieval-Augmented Generation (RAG)** chatbot framework that integrates LLM-based embeddings, ChromaDB for vector search, and a Flask web app to deliver context-aware responses based on indexed documents and conversational memory.
 
 ## Features
