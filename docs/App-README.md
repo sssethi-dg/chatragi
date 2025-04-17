@@ -77,7 +77,7 @@ All endpoints are wrapped in a custom error handler that returns structured JSON
 ## Start the webb app
 
 ```shell
-python3 src/chatragi/app.py
+python src/chatragi/app.py
 ```
 
 ### Sample terminal Output:

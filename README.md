@@ -61,12 +61,18 @@ chatragi/
 git clone https://github.com/sssethi-dg/chatragi.git
 cd chatragi
 
-# Create and activate a virtual environment
-python3 -m venv .venv
-source .venv/bin/activate
+# Create a virtual environment
+python -m venv .venv
+
+# Activate the virtual environment
+# On Linux/macOS
+source .venv/bin/activate 
+
+# On Windows
+.\venv\Scripts\activate 
 
 # Upgrade essential tools
-python3 -m pip install --upgrade pip setuptools wheel
+python -m pip install --upgrade pip setuptools wheel
 
 # Install project in editable mode
 pip install -e .
@@ -75,6 +81,21 @@ pip install -e .
 pip install -e '.[dev]'
 ```
 
+**Note for Windows Users**
+If you encounter the following error during installation:
+
+```shell
+ERROR: Failed to build installable wheels for some pyproject.toml based projects (chroma-hnswlib)
+```
+
+This usually means C++ build tools are missing from your system. To fix it:
+1. Download and install the [Visual C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools).
+2.	During installation, select the following components under “Individual Components”:
+    - MSVC v143 - VS 2022 C++ x64/x86 build tools (Latest)
+    - Windows 11 SDK (10.0.22621.0) (or the latest version available)
+
+Once installed, try running the installation steps again.
+
 ---
 ## Document Ingestion Service
 
@@ -82,7 +103,7 @@ ChatRagi includes a file watcher that automatically processes and indexes new do
 
 ### Start the service:
 ```shell
-python3 src/chatragi/file_watcher.py
+python src/chatragi/file_watcher.py
 ```
 
 ### Sample output:
@@ -115,7 +136,7 @@ The Flask backend provides several endpoints to power the chatbot UI and RAG log
 
 ### Start the web app:
 ```shell
-python3 src/chatragi/app.py
+python src/chatragi/app.py
 ```
 
 ### Sample terminal output:

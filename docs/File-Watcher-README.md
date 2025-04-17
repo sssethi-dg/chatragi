@@ -59,7 +59,7 @@ These are configured in config.py:
 ## How to Run
 
 ```shell
-python3 src/chatragi/file_watcher.py
+python src/chatragi/file_watcher.py
 ```
 
 ### Sample Output:
