@@ -54,7 +54,7 @@ chatragi/
 ---
 ## Setup Instructions
 
-> Built & tested on: 2022 Mac Studio, M1 Max processor, 32 GB RAM
+> **Environment used for development**: Mac Studio (2022), Apple M1 Max, 32 GB RAM, running Visual Studio Code.
 
 ### Clone and install dependencies:
 ```shell
