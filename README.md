@@ -68,7 +68,7 @@ python -m venv .venv
 # On Linux/macOS
 source .venv/bin/activate 
 
-# On Windows
+# On Windows ✨✨✨
 .\venv\Scripts\activate 
 
 # Upgrade essential tools
@@ -79,10 +79,13 @@ pip install -e .
 
 # (Optional) Install dev tools
 pip install -e '.[dev]'
+
+# ✨✨✨ Note - If you’re using Windows PowerShell (default in Visual Studio Code), you may need to enable script execution before activating your virtual environment.
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
 ```
 
-**Note for Windows Users**
-If you encounter the following error during installation:
+**Note for Windows Users** - If you encounter the following error during installation:
 
 ```shell
 ERROR: Failed to build installable wheels for some pyproject.toml based projects (chroma-hnswlib)
