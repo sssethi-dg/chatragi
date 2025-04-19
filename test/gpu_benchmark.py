@@ -13,10 +13,10 @@ GPU_LAYER_OPTIONS = [1, 10, 20, 30]
 TEST_PROMPT = "Give me a one-line explanation of quantum physics in simple terms."
 
 # Name of the model to benchmark; must already be pulled via `ollama pull <model-name>`.
-LLM_MODEL_NAME = "phi4:latest"  # Options: "gemma3:27b", "gemma3:12b"
+LLM_MODEL_NAME = "mistral-small3.1:latest"  # Options: "mistral-small3.1:latest", "gemma3:12b", "llama3.2:3b", "phi4:latest"
 
 # Output file where benchmarking results will be stored.
-CSV_FILENAME = "./results/gpu_layer_benchmark_results.csv"
+CSV_FILENAME = "results/gpu_layer_benchmark_results.csv"
 
 
 def benchmark_model_response():
@@ -73,4 +73,7 @@ def benchmark_model_response():
 
 
 if __name__ == "__main__":
+    """
+    Main function to run the GPU benchmark test.
+    """
     benchmark_model_response()
