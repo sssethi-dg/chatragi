@@ -222,7 +222,7 @@ def load_csv(file_path: str) -> list:
 
 def load_json(file_path: str) -> list:
     """
-    Loads text from a JSON file, converts it to a formatted string, and splits it into chunks.
+    Loads text from a JSON or JSON Lines file and splits it into chunks.
 
     Args:
         file_path (str): Path to the JSON file.
@@ -232,14 +232,27 @@ def load_json(file_path: str) -> list:
     """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+            try:
+                # Try standard JSON first
+                data = json.load(f)
+            except json.JSONDecodeError:
+                # Fallback to JSON Lines
+                f.seek(0)
+                data = [json.loads(line) for line in f if line.strip()]
 
         if not data:
             logger.warning("Skipping empty JSON: %s", os.path.basename(file_path))
             return []
 
+        # Determine if it's JSONL or plain JSON
+        source = (
+            "jsonl"
+            if isinstance(data, list) and all(isinstance(x, dict) for x in data)
+            else "json"
+        )
         text = json.dumps(data, indent=2)
-        return chunk_text(text, os.path.basename(file_path), "json")
+
+        return chunk_text(text, os.path.basename(file_path), source)
     except Exception as e:
         logger.exception(
             "Error processing JSON '%s': %s", os.path.basename(file_path), e
