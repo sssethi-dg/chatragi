@@ -1,10 +1,12 @@
 
 /**
- * ChatRagi Enhanced Frontend Script
- * Handles chat submission, memory toggling, downloads, dark mode, and source listing.
+ * ChatRagi Script - Modularized with Pagination Renderer and Safety Fixes
+ * ------------------------------------------------------------------------
+ * Handles chatbot interactions, memory/document rendering, dark mode,
+ * chat download, toast notifications, and paginated UIs with caret toggling.
  */
 
-// DOM references
+// ========== DOM Elements ==========
 const chatBox = document.getElementById("chat-box");
 const sendBtn = document.getElementById("send-btn");
 const userInput = document.getElementById("user-input");
@@ -21,13 +23,29 @@ const showDocListBtn = document.getElementById("show-doc-list");
 const sourceContainer = document.getElementById("source-container");
 const sourceBox = document.getElementById("source-box");
 const closeDocBtn = document.getElementById("close-doc-btn");
+const toastContainer = document.querySelector(".toast-container");
 
-// Helper: Scroll chat to latest
+let currentDocPage = 1;
+let currentMemoryPage = 1;
+const DOCS_PER_PAGE = 5;
+const MEMORIES_PER_PAGE = 5;
+
+// ========== Utilities ==========
+
+function showToast(message, type = "success") {
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.innerText = message;
+  toastContainer.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
 const scrollToBottom = () => {
   chatBox.scrollTop = chatBox.scrollHeight;
 };
 
-// Send query
+// ========== Chatbot Interaction ==========
+
 async function sendMessage() {
   const query = userInput.value.trim();
   if (!query) return;
@@ -39,10 +57,9 @@ async function sendMessage() {
     const res = await fetch("/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({ query })
     });
     const data = await res.json();
-
     if (data.error) {
       chatBox.innerHTML += `<div class="ai-message"><strong>Error:</strong> ${data.error}</div>`;
     } else {
@@ -55,30 +72,149 @@ async function sendMessage() {
   }
 }
 
-// Store chat memory (triggered from another UI event)
 async function storeMemory(markImportant = false) {
-  const lastUser = document.querySelector(".user-message:last-child");
-  const lastAI = document.querySelector(".ai-message:last-child");
-  if (!lastUser || !lastAI) return;
+  const lastUser = [...document.querySelectorAll(".user-message")].at(-1);
+  const lastAI = [...document.querySelectorAll(".ai-message")].at(-1);
+  if (!lastUser || !lastAI) {
+    showToast("No conversation to mark.", "error");
+    return;
+  }
+
+  const user_query = lastUser.innerText.replace("You:", "").trim();
+  const response = lastAI.innerText.replace("ChatRagi:", "").trim();
 
   try {
-    await fetch("/store-memory", {
+    const res = await fetch("/store-memory", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_query: lastUser.innerText.replace("You:", "").trim(),
-        response: lastAI.innerText.replace("ChatRagi:", "").trim(),
-        is_important: markImportant,
-      }),
+      body: JSON.stringify({ user_query, response, is_important: markImportant })
     });
-  } catch (err) {
-    console.error("Memory store failed", err);
+    const result = await res.json();
+    result.status === "success"
+      ? showToast("Conversation marked as important.")
+      : showToast("Failed to mark important.", "error");
+  } catch {
+    showToast("Error storing memory.", "error");
   }
 }
 
-// Export chat content
+// ========== Pagination Renderer ==========
+
+function renderPaginatedCards(container, items, page, itemsPerPage, type, paginationHandler, idPrefix = "") {
+  const start = (page - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  const paginatedItems = items.slice(start, end);
+  const totalPages = Math.ceil(items.length / itemsPerPage);
+
+  container.innerHTML = "";
+
+  const pagination = document.createElement("div");
+  pagination.className = "pagination-controls";
+  pagination.innerHTML = `
+    <button id="${idPrefix}-prev-btn" ${page === 1 ? "disabled" : ""}>&laquo; Prev</button>
+    <span>Page ${page} of ${totalPages}</span>
+    <button id="${idPrefix}-next-btn" ${end >= items.length ? "disabled" : ""}>Next &raquo;</button>
+  `;
+  container.appendChild(pagination);
+
+  // Add event listeners safely
+  const prevBtn = document.getElementById(`${idPrefix}-prev-btn`);
+  const nextBtn = document.getElementById(`${idPrefix}-next-btn`);
+  if (prevBtn) prevBtn.addEventListener("click", () => paginationHandler(page - 1));
+  if (nextBtn) nextBtn.addEventListener("click", () => paginationHandler(page + 1));
+
+  paginatedItems.forEach(entry => {
+    const card = document.createElement("div");
+    card.className = type === "memory" ? "memory-card" : "document-card";
+
+    const headerClass = type === "memory" ? "mem-header" : "doc-header";
+    const titleClass = type === "memory" ? "mem-title" : "doc-title";
+    const detailsClass = type === "memory" ? "mem-details" : "doc-details";
+    const metaClass = type === "memory" ? "mem-meta" : "doc-meta";
+
+    const title = type === "memory" ? entry.user_query : entry.file_name;
+    const caret = `<span class="caret-icon">▶</span>`;
+    const header = `<div class="${headerClass}">${caret}<span class="${titleClass}">${title}</span></div>`;
+
+    const details = type === "memory"
+      ? `
+        <div class="${detailsClass}">
+          <div class="${metaClass}"><strong>Timestamp:</strong> ${new Date(entry.timestamp).toLocaleString()}</div>
+          <div class="${metaClass}"><strong>Answer:</strong> ${entry.conversation}</div>
+          <div class="${metaClass}"><strong>Important:</strong> ${entry.important ? "Yes" : "No"}</div>
+        </div>`
+      : `
+        <div class="${detailsClass}">
+          <div class="${metaClass}"><strong>Type:</strong> ${entry.source}</div>
+          <div class="${metaClass}"><strong>Chunks:</strong> ${entry.chunks ?? 0}</div>
+        </div>`;
+
+    card.innerHTML = header + details;
+    container.appendChild(card);
+  });
+
+  container.querySelectorAll(`.${type === "memory" ? "mem-header" : "doc-header"}`).forEach(header => {
+    header.addEventListener("click", () => {
+      const details = header.nextElementSibling;
+      const caret = header.querySelector(".caret-icon");
+      details.classList.toggle("visible");
+      caret.textContent = details.classList.contains("visible") ? "▼" : "▶";
+    });
+  });
+}
+
+// ========== View Handlers ==========
+
+async function showMemory() {
+  memoryContainer.classList.add("active");
+  sourceContainer.classList.remove("active");
+  memoryBox.innerHTML = "<p>Loading...</p>";
+
+  try {
+    const res = await fetch("/all-memories");
+    const data = await res.json();
+    if (!data.memories || data.memories.length === 0) {
+      memoryBox.innerHTML = "<p>No memory found.</p>";
+      return;
+    }
+    renderPaginatedCards(
+      memoryBox, data.memories, currentMemoryPage, MEMORIES_PER_PAGE, "memory",
+      newPage => { currentMemoryPage = newPage; showMemory(); },
+      "mem"
+    );
+  } catch {
+    memoryBox.innerHTML = "<p>Error loading memories.</p>";
+  }
+}
+
+async function showDocs() {
+  sourceContainer.classList.add("active");
+  memoryContainer.classList.remove("active");
+  sourceBox.innerHTML = "<p>Loading...</p>";
+
+  try {
+    const res = await fetch("/list-documents");
+    const data = await res.json();
+    if (!data.documents || data.documents.length === 0) {
+      sourceBox.innerHTML = "<p>No documents found.</p>";
+      return;
+    }
+    renderPaginatedCards(
+      sourceBox, data.documents, currentDocPage, DOCS_PER_PAGE, "document",
+      newPage => { currentDocPage = newPage; showDocs(); },
+      "doc"
+    );
+  } catch (e) {
+    sourceBox.innerHTML = `<p>Error loading documents: ${e.message}</p>`;
+  }
+}
+
 function downloadChat() {
   const text = chatBox.innerText.trim();
+  if (!text) {
+    showToast("Chat is empty. Nothing to download.", "error");
+    return;
+  }
   const blob = new Blob([text], { type: "text/plain" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -86,70 +222,21 @@ function downloadChat() {
   a.click();
 }
 
-// Toggle light/dark mode
-function toggleDarkMode() {
-  document.body.classList.toggle("dark-mode");
-}
-
-// Clear chat box
-function clearChat() {
-  chatBox.innerHTML = "";
-}
-
-// Refresh backend index
 async function refreshIndex() {
   const res = await fetch("/refresh", { method: "POST" });
   const data = await res.json();
-  alert(data.response);
+  showToast(data.response);
 }
 
-// Load all memory records
-async function showMemory() {
-  memoryBox.innerHTML = "<p>Loading...</p>";
-  sourceContainer.classList.remove("active");
-  memoryContainer.classList.add("active");
-
-  try {
-    const res = await fetch("/all-memories");
-    const data = await res.json();
-    memoryBox.innerHTML = data.memories.length
-      ? data.memories.map(
-          (m) => `
-      <div>
-        <p><strong>${new Date(m.timestamp).toLocaleString()}</strong></p>
-        <p><strong>Q:</strong> ${m.user_query}</p>
-        <p><strong>A:</strong> ${m.conversation}</p>
-        <p><strong>Important:</strong> ${m.important ? "Yes" : "No"}</p>
-        <hr>
-      </div>`
-        ).join("")
-      : "<p>No memory found.</p>";
-  } catch {
-    memoryBox.innerHTML = "<p>Error loading memory.</p>";
-  }
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+  showToast("Theme toggled.");
 }
 
-// Load document list
-async function showDocs() {
-  memoryContainer.classList.remove("active");
-  sourceContainer.classList.add("active");
-  sourceBox.innerHTML = "<p>Loading documents...</p>";
-
-  try {
-    const res = await fetch("/list-documents");
-    const data = await res.json();
-    sourceBox.innerHTML = data.documents.length
-      ? data.documents.map((d) => `<p>${d}</p>`).join("")
-      : "<p>No documents indexed.</p>";
-  } catch (e) {
-    sourceBox.innerHTML = `<p>Error: ${e.message}</p>`;
-  }
-}
-
-// Event bindings
+// ========== Event Bindings ==========
 sendBtn.addEventListener("click", sendMessage);
 userInput.addEventListener("keydown", (e) => e.key === "Enter" && sendMessage());
-clearChatBtn.addEventListener("click", clearChat);
+clearChatBtn.addEventListener("click", () => (chatBox.innerHTML = ""));
 refreshBtn.addEventListener("click", refreshIndex);
 markImportantBtn.addEventListener("click", () => storeMemory(true));
 downloadBtn.addEventListener("click", downloadChat);

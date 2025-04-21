@@ -112,33 +112,54 @@ def list_collections() -> None:
         logger.exception("Error listing collections: %s", e)
 
 
-def list_documents() -> list:
+def list_documents() -> list[dict]:
     """
-    Lists all indexed documents in the 'doc_index' collection.
-
-    This function queries the stored documents and their metadata, displaying filenames
-    for easy reference.
+    Lists all indexed documents in the 'doc_index' collection with metadata.
 
     Returns:
-        list: A sorted list of unique filenames of the indexed documents.
+        list[dict]: A list of dictionaries with file_name, source, and chunk count.
     """
     try:
         stored_docs = doc_collection.get()
-        documents = stored_docs.get("documents", [])
         metadatas = stored_docs.get("metadatas", [])
-        if not documents:
+
+        if not metadatas:
             logger.warning("No documents found in ChromaDB.")
             return []
-        unique_file_names = set()
-        for meta_info in metadatas:
-            if isinstance(meta_info, dict):
-                file_name = meta_info.get("file_name")
-                if file_name:
-                    unique_file_names.add(file_name)
+
+        file_stats = {}
+
+        for meta in metadatas:
+            if not isinstance(meta, dict):
+                continue
+
+            file_name = meta.get("file_name")
+            source = meta.get("source", "unknown")
+
+            if file_name:
+                if file_name not in file_stats:
+                    file_stats[file_name] = {
+                        "file_name": file_name,
+                        "source": source,
+                        "chunks": 1,
+                    }
+                else:
+                    file_stats[file_name]["chunks"] += 1
+
+        results = sorted(file_stats.values(), key=lambda x: x["file_name"].lower())
+
         logger.info("Stored Documents in ChromaDB:")
-        for i, file_name in enumerate(sorted(unique_file_names), start=1):
-            logger.info("Source Document %d: %s", i, file_name)
-        return sorted(unique_file_names)
+        for i, doc in enumerate(results, start=1):
+            logger.info(
+                "Source Document %d: %s (%s, %d chunks)",
+                i,
+                doc["file_name"],
+                doc["source"],
+                doc["chunks"],
+            )
+
+        return results
+
     except Exception as e:
         logger.exception("Error listing documents: %s", e)
         return []

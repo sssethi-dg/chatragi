@@ -58,7 +58,7 @@ def export_chromadb_contents():
                 for doc, meta in zip(stored_docs["documents"], stored_docs["metadatas"])
             ]
             write_to_csv(
-                "results/documents.csv",
+                "documents.csv",
                 document_rows,
                 headers=["Document Chunk", "File Name"],
             )
@@ -76,7 +76,7 @@ def export_chromadb_contents():
                 )
             ]
             write_to_csv(
-                "results/chat_memory.csv",
+                "chat_memory.csv",
                 memory_rows,
                 headers=["Chat Message", "Session ID"],
             )
