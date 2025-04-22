@@ -49,9 +49,17 @@ const scrollToBottom = () => {
 async function sendMessage() {
   const query = userInput.value.trim();
   if (!query) return;
-  chatBox.innerHTML += `<div class="user-message"><strong>You:</strong> ${query}</div>`;
-  userInput.value = "";
+
+  // Render user's message
+  const userBubble = document.createElement("div");
+  userBubble.className = "user-message";
+  userBubble.innerHTML = `
+    <div class="message-label">You:</div>
+    <div class="message-content">${query}</div>
+  `;
+  chatBox.appendChild(userBubble);
   scrollToBottom();
+  userInput.value = "";
 
   try {
     const res = await fetch("/ask", {
@@ -60,17 +68,40 @@ async function sendMessage() {
       body: JSON.stringify({ query })
     });
     const data = await res.json();
+
     if (data.error) {
-      chatBox.innerHTML += `<div class="ai-message"><strong>Error:</strong> ${data.error}</div>`;
+      const errorBubble = document.createElement("div");
+      errorBubble.className = "ai-message";
+      errorBubble.innerHTML = `<div class="message-label">Error:</div><div class="message-content">${data.error}</div>`;
+      chatBox.appendChild(errorBubble);
     } else {
       const answer = marked.parse(data.answer);
-      chatBox.innerHTML += `<div class="ai-message"><strong>ChatRagi:</strong><div>${answer}</div></div><hr>`;
-      scrollToBottom();
+      const aiBubble = document.createElement("div");
+      aiBubble.className = "ai-message";
+      aiBubble.innerHTML = `
+        <div class="message-label">ChatRagi:</div>
+        <div class="message-content">${answer}</div>
+      `;
+
+      chatBox.appendChild(aiBubble);
+
+      const separator = document.createElement("hr");
+      chatBox.appendChild(separator);
     }
+
+    scrollToBottom();
   } catch {
-    chatBox.innerHTML += `<div class="ai-message"><strong>Error:</strong> Server unreachable.</div>`;
+    const errorBubble = document.createElement("div");
+    errorBubble.className = "ai-message";
+    errorBubble.innerHTML = `<div class="message-label">Error:</div><div class="message-content">Server unreachable.</div>`;
+    chatBox.appendChild(errorBubble);
+    scrollToBottom();
   }
 }
+
+
+// Track already-marked messages (lightweight in-memory store)
+const savedConversations = new Set();
 
 async function storeMemory(markImportant = false) {
   const lastUser = [...document.querySelectorAll(".user-message")].at(-1);
@@ -82,6 +113,12 @@ async function storeMemory(markImportant = false) {
 
   const user_query = lastUser.innerText.replace("You:", "").trim();
   const response = lastAI.innerText.replace("ChatRagi:", "").trim();
+  const key = `${user_query}|||${response}`;
+
+  if (markImportant && savedConversations.has(key)) {
+    showToast("This conversation is already marked as important.", "error");
+    return;
+  }
 
   try {
     const res = await fetch("/store-memory", {
@@ -90,10 +127,14 @@ async function storeMemory(markImportant = false) {
       body: JSON.stringify({ user_query, response, is_important: markImportant })
     });
     const result = await res.json();
-    result.status === "success"
-      ? showToast("Conversation marked as important.")
-      : showToast("Failed to mark important.", "error");
-  } catch {
+
+    if (result.status === "success") {
+      if (markImportant) savedConversations.add(key);
+      showToast("Conversation marked as important.");
+    } else {
+      showToast("Failed to mark important.", "error");
+    }
+  } catch (err) {
     showToast("Error storing memory.", "error");
   }
 }

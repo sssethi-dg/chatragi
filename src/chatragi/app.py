@@ -7,8 +7,11 @@ memories, refresh the document index, and list stored documents and memories.
 """
 
 # import os
-import markdown  # type: ignore
+import markdown  # type: ignore[import]
 from flask import Flask, jsonify, render_template, request
+
+# from markdown.extensions.codehilite import CodeHiliteExtension # type: ignore[import]
+from markdown.extensions.fenced_code import FencedCodeExtension  # type: ignore[import]
 
 from chatragi.utils.chat_memory import fetch_all_memories, store_memory
 from chatragi.utils.chatbot import query_engine, refresh_index
@@ -37,18 +40,17 @@ def home():
 
 def format_response(response_text: str) -> str:
     """
-    Formats chatbot responses using Markdown for enhanced readability, including support
-    for fenced code blocks and syntax highlighting.
+    Formats chatbot responses using Markdown with fenced code blocks.
 
     Args:
-        response_text (str): The raw response text from the chatbot.
+        response_text (str): Raw LLM output.
 
     Returns:
-        str: The formatted HTML string.
+        str: HTML with proper <pre><code>...</code></pre> wrapping.
     """
     try:
         return markdown.markdown(
-            response_text, extensions=["fenced_code", "codehilite"]
+            response_text, extensions=[FencedCodeExtension()], output_format="html5"
         )
     except Exception as e:
         logger.exception("Error formatting response text: %s", e)

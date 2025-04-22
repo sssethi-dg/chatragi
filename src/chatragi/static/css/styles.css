@@ -12,6 +12,10 @@
   --meta-color: #555;
   --muted-color: #666;
   --toast-bg: #333;
+  --inline-code-bg: #f0f0f0;
+  --inline-code-text: #d6336c;
+  --block-code-bg: #272822;
+  --block-code-text: #f8f8f2;
 }
 
 body.dark-mode {
@@ -27,6 +31,10 @@ body.dark-mode {
   --meta-color: #ccc;
   --muted-color: #aaa;
   --toast-bg: #444;
+  --inline-code-bg: #2c2c2c;
+  --inline-code-text: #ffa7c4;
+  --block-code-bg: #1e1e1e;
+  --block-code-text: #f1f1f1;
 }
 
 /* ---------- Base Styling ---------- */
@@ -93,6 +101,82 @@ body {
   border-radius: 8px;
   margin-bottom: 20px;
   font-size: 14px;
+}
+
+/* ---------- Chat Message Styling ---------- */
+.user-message,
+.ai-message {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  max-width: 100%;
+}
+
+.user-message {
+  align-self: flex-end;
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.ai-message {
+  align-self: flex-start;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.message-label {
+  font-weight: bold;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.message-content {
+  font-size: 15px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* ---------- Inline Code Styling ---------- */
+.message-content code:not(pre code) {
+  background-color: var(--inline-code-bg, #f0f0f0);
+  color: var(--inline-code-text, #c7254e);
+  padding: 3px 6px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  white-space: break-spaces;
+}
+
+/* ---------- Multi-line Code Block Styling ---------- */
+.message-content pre code {
+  background-color: var(--block-code-bg, #2d2d2d);
+  color: var(--block-code-text, #f8f8f2);
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  overflow-x: auto;
+  display: block;
+  line-height: 1.5;
+  border: 1px solid var(--border-color, #444);
+  margin: 10px 0;
+}
+
+/* Custom Scrollbar for Code Blocks */
+.message-content pre::-webkit-scrollbar {
+  height: 8px;
+}
+.message-content pre::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+.message-content pre::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
 }
 
 /* ---------- Input Area ---------- */
