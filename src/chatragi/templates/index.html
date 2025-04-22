@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,28 +12,37 @@
         <header>
             <h1>ChatRagi</h1>
             <div class="header-actions">
-                <button id="mark-important-btn" class="action-button" title="Mark as Important"><i class="fa-regular fa-bookmark"></i> Mark as Important</button>
-                <button id="download-btn" class="action-button" title="Download Chat"><i class="fa-solid fa-download"></i> Download Chat</button>
-                <button id="theme-toggle-btn" class="action-button" title="Toggle Dark Mode"><i class="fa-solid fa-moon"></i></button>
+              <button id="mark-important-btn" class="action-button" title="Mark as Important">
+                <i class="fa-regular fa-bookmark"></i> Mark as Important
+              </button>
+              <button id="download-btn" class="action-button" title="Download Chat">
+                <i class="fa-solid fa-download"></i> Download Chat
+              </button>
+              <button id="theme-toggle-btn" class="action-button" title="Toggle Dark Mode">
+                <i class="fa-solid fa-moon"></i>
+              </button>
             </div>
-        </header>
+          </header>
 
+        <!-- Chat Output -->
         <div id="chat-box"></div>
 
+        <!-- Chat Input -->
         <div id="input-area">
             <input type="text" id="user-input" placeholder="Ask me anything..." autocomplete="off">
             <button id="send-btn" title="Send"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
 
+        <!-- Action Buttons -->
         <div class="button-group">
-            <button id="show-memory-btn" class="action-button"><i class="fa-solid fa-clock-rotate-left"></i> Show Memory</button>
+            <button id="show-memory-btn" class="action-button"><i class="fa-solid fa-clock-rotate-left"></i> Show Saved Memory</button>
             <button id="show-doc-list" class="action-button"><i class="fa-solid fa-list"></i> List Sources</button>
             <button id="refresh-btn" class="action-button"><i class="fa-solid fa-sync"></i> Refresh Index</button>
             <button id="clear-chat-btn" class="action-button"><i class="fa-solid fa-trash"></i> Clear</button>
         </div>
     </div>
 
-
+    <!-- Memory Panel -->
     <div id="memory-container" class="container-slide">
         <div class="panel-header">  
             <h2>Chat Memory</h2>
@@ -43,6 +51,7 @@
         <div id="memory-box"></div>
     </div>
 
+    <!-- Source Panel -->
     <div id="source-container" class="container-slide">
         <div class="panel-header">
             <h2>Source Documents</h2>
@@ -53,7 +62,8 @@
 
     <!-- Toast Notification Container -->
     <div class="toast-container" id="toast-container"></div>
-    
+
+    <!-- Scripts -->
     <script src="static/js/scripts.js"></script>
 </body>
 </html>

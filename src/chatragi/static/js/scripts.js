@@ -1,9 +1,8 @@
-
 /**
- * ChatRagi Script - Modularized with Pagination Renderer and Safety Fixes
- * ------------------------------------------------------------------------
- * Handles chatbot interactions, memory/document rendering, dark mode,
- * chat download, toast notifications, and paginated UIs with caret toggling.
+ * ChatRagi Script – Cleaned and Simplified
+ * ----------------------------------------
+ * Handles chatbot interactions, dark mode, memory/document listing,
+ * toast notifications, and basic file operations.
  */
 
 // ========== DOM Elements ==========
@@ -30,8 +29,7 @@ let currentMemoryPage = 1;
 const DOCS_PER_PAGE = 5;
 const MEMORIES_PER_PAGE = 5;
 
-// ========== Utilities ==========
-
+// ========== Toast & Scroll ==========
 function showToast(message, type = "success") {
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
@@ -44,22 +42,20 @@ const scrollToBottom = () => {
   chatBox.scrollTop = chatBox.scrollHeight;
 };
 
-// ========== Chatbot Interaction ==========
-
+// ========== Chatbot ==========
 async function sendMessage() {
   const query = userInput.value.trim();
   if (!query) return;
 
-  // Render user's message
+  // Show user message
   const userBubble = document.createElement("div");
   userBubble.className = "user-message";
   userBubble.innerHTML = `
     <div class="message-label">You:</div>
-    <div class="message-content">${query}</div>
-  `;
+    <div class="message-content">${query}</div>`;
   chatBox.appendChild(userBubble);
-  scrollToBottom();
   userInput.value = "";
+  scrollToBottom();
 
   try {
     const res = await fetch("/ask", {
@@ -69,20 +65,21 @@ async function sendMessage() {
     });
     const data = await res.json();
 
+    // Error bubble
     if (data.error) {
       const errorBubble = document.createElement("div");
       errorBubble.className = "ai-message";
-      errorBubble.innerHTML = `<div class="message-label">Error:</div><div class="message-content">${data.error}</div>`;
+      errorBubble.innerHTML = `
+        <div class="message-label">Error:</div>
+        <div class="message-content">${data.error}</div>`;
       chatBox.appendChild(errorBubble);
     } else {
-      const answer = marked.parse(data.answer);
+      // AI response
       const aiBubble = document.createElement("div");
       aiBubble.className = "ai-message";
       aiBubble.innerHTML = `
         <div class="message-label">ChatRagi:</div>
-        <div class="message-content">${answer}</div>
-      `;
-
+        <div class="message-content">${marked.parse(data.answer)}</div>`;
       chatBox.appendChild(aiBubble);
 
       const separator = document.createElement("hr");
@@ -93,14 +90,15 @@ async function sendMessage() {
   } catch {
     const errorBubble = document.createElement("div");
     errorBubble.className = "ai-message";
-    errorBubble.innerHTML = `<div class="message-label">Error:</div><div class="message-content">Server unreachable.</div>`;
+    errorBubble.innerHTML = `
+      <div class="message-label">Error:</div>
+      <div class="message-content">Server unreachable.</div>`;
     chatBox.appendChild(errorBubble);
     scrollToBottom();
   }
 }
 
-
-// Track already-marked messages (lightweight in-memory store)
+// ========== Memory Handling ==========
 const savedConversations = new Set();
 
 async function storeMemory(markImportant = false) {
@@ -134,13 +132,12 @@ async function storeMemory(markImportant = false) {
     } else {
       showToast("Failed to mark important.", "error");
     }
-  } catch (err) {
+  } catch {
     showToast("Error storing memory.", "error");
   }
 }
 
 // ========== Pagination Renderer ==========
-
 function renderPaginatedCards(container, items, page, itemsPerPage, type, paginationHandler, idPrefix = "") {
   const start = (page - 1) * itemsPerPage;
   const end = start + itemsPerPage;
@@ -154,15 +151,11 @@ function renderPaginatedCards(container, items, page, itemsPerPage, type, pagina
   pagination.innerHTML = `
     <button id="${idPrefix}-prev-btn" ${page === 1 ? "disabled" : ""}>&laquo; Prev</button>
     <span>Page ${page} of ${totalPages}</span>
-    <button id="${idPrefix}-next-btn" ${end >= items.length ? "disabled" : ""}>Next &raquo;</button>
-  `;
+    <button id="${idPrefix}-next-btn" ${end >= items.length ? "disabled" : ""}>Next &raquo;</button>`;
   container.appendChild(pagination);
 
-  // Add event listeners safely
-  const prevBtn = document.getElementById(`${idPrefix}-prev-btn`);
-  const nextBtn = document.getElementById(`${idPrefix}-next-btn`);
-  if (prevBtn) prevBtn.addEventListener("click", () => paginationHandler(page - 1));
-  if (nextBtn) nextBtn.addEventListener("click", () => paginationHandler(page + 1));
+  document.getElementById(`${idPrefix}-prev-btn`)?.addEventListener("click", () => paginationHandler(page - 1));
+  document.getElementById(`${idPrefix}-next-btn`)?.addEventListener("click", () => paginationHandler(page + 1));
 
   paginatedItems.forEach(entry => {
     const card = document.createElement("div");
@@ -205,7 +198,6 @@ function renderPaginatedCards(container, items, page, itemsPerPage, type, pagina
 }
 
 // ========== View Handlers ==========
-
 async function showMemory() {
   memoryContainer.classList.add("active");
   sourceContainer.classList.remove("active");
@@ -218,8 +210,7 @@ async function showMemory() {
       memoryBox.innerHTML = "<p>No memory found.</p>";
       return;
     }
-    renderPaginatedCards(
-      memoryBox, data.memories, currentMemoryPage, MEMORIES_PER_PAGE, "memory",
+    renderPaginatedCards(memoryBox, data.memories, currentMemoryPage, MEMORIES_PER_PAGE, "memory",
       newPage => { currentMemoryPage = newPage; showMemory(); },
       "mem"
     );
@@ -229,8 +220,8 @@ async function showMemory() {
 }
 
 async function showDocs() {
-  sourceContainer.classList.add("active");
   memoryContainer.classList.remove("active");
+  sourceContainer.classList.add("active");
   sourceBox.innerHTML = "<p>Loading...</p>";
 
   try {
@@ -240,8 +231,7 @@ async function showDocs() {
       sourceBox.innerHTML = "<p>No documents found.</p>";
       return;
     }
-    renderPaginatedCards(
-      sourceBox, data.documents, currentDocPage, DOCS_PER_PAGE, "document",
+    renderPaginatedCards(sourceBox, data.documents, currentDocPage, DOCS_PER_PAGE, "document",
       newPage => { currentDocPage = newPage; showDocs(); },
       "doc"
     );
@@ -250,12 +240,14 @@ async function showDocs() {
   }
 }
 
+// ========== Utilities ==========
 function downloadChat() {
   const text = chatBox.innerText.trim();
   if (!text) {
     showToast("Chat is empty. Nothing to download.", "error");
     return;
   }
+
   const blob = new Blob([text], { type: "text/plain" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -274,7 +266,7 @@ function toggleDarkMode() {
   showToast("Theme toggled.");
 }
 
-// ========== Event Bindings ==========
+// ========== Event Listeners ==========
 sendBtn.addEventListener("click", sendMessage);
 userInput.addEventListener("keydown", (e) => e.key === "Enter" && sendMessage());
 clearChatBtn.addEventListener("click", () => (chatBox.innerHTML = ""));
