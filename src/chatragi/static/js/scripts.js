@@ -74,16 +74,27 @@ async function sendMessage() {
         <div class="message-content">${data.error}</div>`;
       chatBox.appendChild(errorBubble);
     } else {
-      // AI response
+      // Create base AI message bubble
       const aiBubble = document.createElement("div");
       aiBubble.className = "ai-message";
       aiBubble.innerHTML = `
         <div class="message-label">ChatRagi:</div>
         <div class="message-content">${marked.parse(data.answer)}</div>`;
-      chatBox.appendChild(aiBubble);
 
-      const separator = document.createElement("hr");
-      chatBox.appendChild(separator);
+      // Check if citations exist and add below the answer
+      if (data.citations && data.citations.length > 0) {
+        const citationSection = document.createElement("div");
+        citationSection.className = "ai-citations";
+        citationSection.innerHTML = `
+          <div class="message-label">Sources:</div>
+          <ol>
+            ${data.citations.map(c => `<li>${c}</li>`).join('')}
+          </ol>`;
+        aiBubble.appendChild(citationSection);
+      }
+
+      chatBox.appendChild(aiBubble);
+      chatBox.appendChild(document.createElement("hr"));
     }
 
     scrollToBottom();

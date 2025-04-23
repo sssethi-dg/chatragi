@@ -417,3 +417,37 @@ body {
   10%, 90% { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(-10px); }
 }
+
+/* Citation Block Styling */
+.citations {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted-color);
+}
+
+.citation-list {
+  padding-left: 20px;
+  margin: 4px 0 0;
+}
+
+.citation-list li {
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.ai-citations {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted-color);
+  border-top: 1px dashed var(--border-color);
+  padding-top: 8px;
+}
+
+.ai-citations ol {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.ai-citations li {
+  margin-bottom: 6px;
+}
