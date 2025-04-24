@@ -1,5 +1,5 @@
 /**
- * ChatRagi Script – Cleaned and Simplified
+ * ChatRagi Script – Final Refactored
  * ----------------------------------------
  * Handles chatbot interactions, dark mode, memory/document listing,
  * toast notifications, and basic file operations.
@@ -42,17 +42,22 @@ const scrollToBottom = () => {
   chatBox.scrollTop = chatBox.scrollHeight;
 };
 
+// ========== Utility: Create Message Bubble ==========
+function createMessageBubble(label, content, className) {
+  const bubble = document.createElement("div");
+  bubble.className = className;
+  bubble.innerHTML = `
+    <div class="message-label">${label}</div>
+    <div class="message-content">${content}</div>`;
+  return bubble;
+}
+
 // ========== Chatbot ==========
 async function sendMessage() {
   const query = userInput.value.trim();
   if (!query) return;
 
-  // Show user message
-  const userBubble = document.createElement("div");
-  userBubble.className = "user-message";
-  userBubble.innerHTML = `
-    <div class="message-label">You:</div>
-    <div class="message-content">${query}</div>`;
+  const userBubble = createMessageBubble("You:", query, "user-message");
   chatBox.appendChild(userBubble);
   userInput.value = "";
   scrollToBottom();
@@ -65,31 +70,18 @@ async function sendMessage() {
     });
     const data = await res.json();
 
-    // Error bubble
     if (data.error) {
-      const errorBubble = document.createElement("div");
-      errorBubble.className = "ai-message";
-      errorBubble.innerHTML = `
-        <div class="message-label">Error:</div>
-        <div class="message-content">${data.error}</div>`;
+      const errorBubble = createMessageBubble("Error:", data.error, "ai-message");
       chatBox.appendChild(errorBubble);
     } else {
-      // Create base AI message bubble
-      const aiBubble = document.createElement("div");
-      aiBubble.className = "ai-message";
-      aiBubble.innerHTML = `
-        <div class="message-label">ChatRagi:</div>
-        <div class="message-content">${marked.parse(data.answer)}</div>`;
+      const aiBubble = createMessageBubble("ChatRagi:", marked.parse(data.answer), "ai-message");
 
-      // Check if citations exist and add below the answer
-      if (data.citations && data.citations.length > 0) {
+      if (data.citations?.length > 0) {
         const citationSection = document.createElement("div");
         citationSection.className = "ai-citations";
         citationSection.innerHTML = `
           <div class="message-label">Sources:</div>
-          <ol>
-            ${data.citations.map(c => `<li>${c}</li>`).join('')}
-          </ol>`;
+          <ol>${data.citations.map(c => `<li>${c}</li>`).join("")}</ol>`;
         aiBubble.appendChild(citationSection);
       }
 
@@ -98,14 +90,11 @@ async function sendMessage() {
     }
 
     scrollToBottom();
-  } catch {
-    const errorBubble = document.createElement("div");
-    errorBubble.className = "ai-message";
-    errorBubble.innerHTML = `
-      <div class="message-label">Error:</div>
-      <div class="message-content">Server unreachable.</div>`;
+  } catch (err) {
+    const errorBubble = createMessageBubble("Error:", "Server unreachable.", "ai-message");
     chatBox.appendChild(errorBubble);
     scrollToBottom();
+    console.error("Error sending message:", err);
   }
 }
 
@@ -143,8 +132,9 @@ async function storeMemory(markImportant = false) {
     } else {
       showToast("Failed to mark important.", "error");
     }
-  } catch {
+  } catch (err) {
     showToast("Error storing memory.", "error");
+    console.error("Error storing memory:", err);
   }
 }
 
@@ -182,14 +172,12 @@ function renderPaginatedCards(container, items, page, itemsPerPage, type, pagina
     const header = `<div class="${headerClass}">${caret}<span class="${titleClass}">${title}</span></div>`;
 
     const details = type === "memory"
-      ? `
-        <div class="${detailsClass}">
+      ? `<div class="${detailsClass}">
           <div class="${metaClass}"><strong>Timestamp:</strong> ${new Date(entry.timestamp).toLocaleString()}</div>
           <div class="${metaClass}"><strong>Answer:</strong> ${entry.conversation}</div>
           <div class="${metaClass}"><strong>Important:</strong> ${entry.important ? "Yes" : "No"}</div>
         </div>`
-      : `
-        <div class="${detailsClass}">
+      : `<div class="${detailsClass}">
           <div class="${metaClass}"><strong>Type:</strong> ${entry.source}</div>
           <div class="${metaClass}"><strong>Chunks:</strong> ${entry.chunks ?? 0}</div>
         </div>`;

@@ -37,9 +37,17 @@ body.dark-mode {
   --block-code-text: #f1f1f1;
 }
 
+/* Auto-enable dark mode if user's system prefers it */
+@media (prefers-color-scheme: dark) {
+  body:not(.dark-mode) {
+    background-color: var(--background-color);
+    color: var(--text-color);
+  }
+}
+
 /* ---------- Base Styling ---------- */
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   margin: 0;
   padding: 0;
   background-color: var(--background-color);
@@ -56,7 +64,7 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* ---------- Header ---------- */
+/* ---------- Header Actions ---------- */
 .header-actions {
   display: flex;
   gap: 10px;
@@ -89,6 +97,71 @@ body {
   border-radius: 8px;
   margin-bottom: 20px;
   font-size: 14px;
+}
+
+/* ---------- Input Styling ---------- */
+#input-area {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+#user-input {
+  flex-grow: 1;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1.8px solid var(--border-color);
+  background-color: var(--panel-bg);
+  color: var(--text-color);
+}
+
+#user-input:focus {
+  border-color: var(--accent-color);
+}
+
+#send-btn {
+  padding: 12px 16px;
+  font-size: 18px;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+#send-btn:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+/* ---------- Action Buttons ---------- */
+.action-button {
+  padding: 12px 14px;
+  border-radius: 6px;
+  background-color: var(--accent-color);
+  color: white;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-button:hover {
+  background-color: var(--accent-hover);
+}
+
+/* ---------- Accessibility: Focus States ---------- */
+button:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
 }
 
 /* ---------- Message Styling ---------- */
@@ -163,65 +236,6 @@ body {
   line-height: 1.5;
   border: 1px solid var(--border-color);
   margin: 10px 0;
-}
-
-/* ---------- Input Area ---------- */
-#input-area {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  width: 100%;
-  margin-top: 20px;
-}
-
-#user-input {
-  flex-grow: 1;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 6px;
-  border: 1.8px solid var(--border-color);
-  background-color: var(--panel-bg);
-  color: var(--text-color);
-}
-
-#user-input:focus {
-  border-color: var(--accent-color);
-}
-
-#send-btn {
-  padding: 12px 16px;
-  font-size: 18px;
-  background-color: var(--accent-color);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-#send-btn:hover {
-  background-color: var(--accent-hover);
-  transform: translateY(-1px);
-}
-
-/* ---------- Action Buttons ---------- */
-.action-button {
-  padding: 12px 14px;
-  border-radius: 6px;
-  background-color: var(--accent-color);
-  color: white;
-  font-size: 14px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.action-button:hover {
-  background-color: var(--accent-hover);
 }
 
 /* ---------- Bottom Button Group ---------- */
@@ -418,23 +432,7 @@ body {
   100% { opacity: 0; transform: translateY(-10px); }
 }
 
-/* Citation Block Styling */
-.citations {
-  margin-top: 10px;
-  font-size: 13px;
-  color: var(--muted-color);
-}
-
-.citation-list {
-  padding-left: 20px;
-  margin: 4px 0 0;
-}
-
-.citation-list li {
-  margin-bottom: 6px;
-  line-height: 1.4;
-}
-
+/* ---------- Citation Styling ---------- */
 .ai-citations {
   margin-top: 10px;
   font-size: 13px;

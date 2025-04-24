@@ -1,10 +1,10 @@
 """
 Database Utilities for ChatRagi
 
-This module provides functions for interacting with ChromaDB, including managing
-chatbot memory and document indexing. It supports operations such as deleting outdated
-memories, logging the number of indexed documents, listing available collections, and
-removing specific documents by filename.
+This module provides functions for interacting with ChromaDB, including:
+- Managing chat memory collections
+- Deleting stale or unimportant data
+- Listing and removing indexed documents
 """
 
 from datetime import datetime, timedelta
@@ -12,9 +12,9 @@ from datetime import datetime, timedelta
 import chromadb
 
 from chatragi.config import DB_PATH, TIME_DECAY_DAYS
-from chatragi.utils.logger_config import logger  # Import the centralized logger
+from chatragi.utils.logger_config import logger
 
-# Initialize ChromaDB with persistent storage
+# Initialize ChromaDB client and key collections
 try:
     chroma_client = chromadb.PersistentClient(path=DB_PATH)
     memory_collection = chroma_client.get_or_create_collection("chat_memory")
@@ -26,34 +26,37 @@ except Exception as e:
 
 def delete_non_important_memories() -> None:
     """
-    Deletes chatbot memory that is older than TIME_DECAY_DAYS unless marked as important.
+    Deletes chatbot memory older than TIME_DECAY_DAYS unless marked as important.
 
-    This function helps maintain efficient memory storage by removing outdated,
-    non-essential records.
-
-    Returns:
-        None
+    Helps maintain efficient memory usage by pruning outdated entries.
     """
     cutoff_date = datetime.utcnow() - timedelta(days=TIME_DECAY_DAYS)
+
     try:
-        results = memory_collection.get()  # Retrieve all stored memories
+        results = memory_collection.get()
         ids_to_delete = []
+
         for doc, meta in zip(
             results.get("documents", []), results.get("metadatas", [])
         ):
             if not isinstance(meta, dict):
-                continue  # Skip invalid metadata entries
+                continue  # Skip entries without valid metadata
+
             timestamp = meta.get("timestamp")
             if not timestamp:
                 logger.warning("Skipping entry without timestamp: %s", meta)
                 continue
+
             stored_time = datetime.fromisoformat(timestamp)
-            # If the record is older than the cutoff and not marked as important, mark it for deletion
+
+            # Mark for deletion if not important and older than cutoff
             if stored_time < cutoff_date and not meta.get("important", False):
-                if "id" in meta:
-                    ids_to_delete.append(meta["id"])
+                doc_id = meta.get("id")
+                if doc_id:
+                    ids_to_delete.append(doc_id)
                 else:
                     logger.warning("Missing 'id' in metadata: %s", meta)
+
         if ids_to_delete:
             memory_collection.delete(ids=ids_to_delete)
             logger.info(
@@ -67,18 +70,13 @@ def delete_non_important_memories() -> None:
         logger.exception("Error during memory cleanup: %s", e)
 
 
-# Run memory cleanup at startup
+# Run cleanup during module load
 delete_non_important_memories()
 
 
 def log_indexed_documents() -> None:
     """
     Logs the total number of indexed documents in ChromaDB.
-
-    This function tracks the growth of stored documents over time.
-
-    Returns:
-        None
     """
     try:
         num_stored_docs = len(doc_collection.get().get("documents", []))
@@ -87,18 +85,13 @@ def log_indexed_documents() -> None:
         logger.exception("Unable to count stored documents: %s", e)
 
 
-# Log document count at startup
+# Log document count during module load
 log_indexed_documents()
 
 
 def list_collections() -> None:
     """
     Lists all available collections in ChromaDB.
-
-    This function prints the names of all collections currently stored in ChromaDB.
-
-    Returns:
-        None
     """
     try:
         collections = chroma_client.list_collections()
@@ -114,10 +107,10 @@ def list_collections() -> None:
 
 def list_documents() -> list[dict]:
     """
-    Lists all indexed documents in the 'doc_index' collection with metadata.
+    Lists all indexed documents with metadata from the 'doc_index' collection.
 
     Returns:
-        list[dict]: A list of dictionaries with file_name, source, and chunk count.
+        list[dict]: List of documents with file_name, source, and chunk count.
     """
     try:
         stored_docs = doc_collection.get()
@@ -167,13 +160,10 @@ def list_documents() -> list[dict]:
 
 def delete_document_by_filename(file_name: str) -> None:
     """
-    Deletes a specific document from ChromaDB based on its filename.
+    Deletes a specific document from ChromaDB by filename.
 
     Args:
-        file_name (str): The name of the file to delete from the database.
-
-    Returns:
-        None
+        file_name (str): The name of the file to remove from storage.
     """
     try:
         logger.info("Deleting document: %s from ChromaDB...", file_name)

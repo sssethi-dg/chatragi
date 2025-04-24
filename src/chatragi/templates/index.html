@@ -5,27 +5,34 @@
     <title>ChatRagi - Local RAG Chatbot</title>
     <link rel="stylesheet" href="static/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
+    <noscript>
+        <div class="noscript-warning">
+            JavaScript is required to use ChatRagi. Please enable it in your browser.
+        </div>
+    </noscript>
+
     <div id="chat-container">
         <header>
             <h1>ChatRagi</h1>
             <div class="header-actions">
-              <button id="mark-important-btn" class="action-button" title="Mark as Important">
-                <i class="fa-regular fa-bookmark"></i> Mark as Important
-              </button>
-              <button id="download-btn" class="action-button" title="Download Chat">
-                <i class="fa-solid fa-download"></i> Download Chat
-              </button>
-              <button id="theme-toggle-btn" class="action-button" title="Toggle Dark Mode">
-                <i class="fa-solid fa-moon"></i>
-              </button>
+                <button id="mark-important-btn" class="action-button" title="Mark as Important">
+                    <i class="fa-regular fa-bookmark"></i> Mark as Important
+                </button>
+                <button id="download-btn" class="action-button" title="Download Chat">
+                    <i class="fa-solid fa-download"></i> Download Chat
+                </button>
+                <button id="theme-toggle-btn" class="action-button" title="Toggle Dark Mode">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
             </div>
-          </header>
+        </header>
 
         <!-- Chat Output -->
-        <div id="chat-box"></div>
+        <div id="chat-box" role="log" aria-live="polite"></div>
 
         <!-- Chat Input -->
         <div id="input-area">
@@ -64,6 +71,6 @@
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts -->
-    <script src="static/js/scripts.js"></script>
+    <script src="static/js/scripts.js" defer></script>
 </body>
 </html>

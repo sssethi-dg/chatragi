@@ -16,7 +16,7 @@ from flask import Flask, jsonify, render_template, request
 from markdown.extensions.fenced_code import FencedCodeExtension  # type: ignore[import]
 
 from chatragi.utils.chat_memory import fetch_all_memories, retrieve_memory, store_memory
-from chatragi.utils.chatbot import query_engine, refresh_index
+from chatragi.utils.chatbot import ask_chatbot, refresh_index
 from chatragi.utils.db_utils import list_documents
 from chatragi.utils.logger_config import logger  # Centralized logger
 
@@ -54,6 +54,7 @@ def format_response(response_text: str) -> str:
         str: HTML-formatted response with normalized structure.
     """
 
+    # Normalize markdown formatting and spacing
     def normalize_markdown_spacing(text: str) -> str:
         lines = text.splitlines()
         cleaned: list[str] = []
@@ -130,7 +131,7 @@ def format_structured_prompt(user_query: str, retrieved_memories: list[str]) -> 
 def ask():
     """
     Handles incoming user queries, enriches them with memory context,
-    submits to the LLM engine, formats the response, and returns it.
+    submits to the LLM engine via ask_chatbot(), formats the response, and returns it.
 
     Request JSON:
         {
@@ -141,8 +142,6 @@ def ask():
         JSON response:
         {
             "answer": "<formatted markdown HTML>",
-            "score": <optional model score>,
-            "metadata": <model metadata>,
             "citations": [<source names>]
         }
     """
@@ -160,22 +159,14 @@ def ask():
         # Step 2: Build structured prompt with memory context
         full_prompt = format_structured_prompt(user_query, relevant_memories)
 
-        # Step 3: Query the LLM
-        response = query_engine.query(full_prompt)
+        # Step 3: Ask chatbot and get answer + citations
+        result = ask_chatbot(full_prompt)
 
         # Step 4: Format the markdown output to HTML
-        formatted_answer = format_response(response.response)
+        formatted_answer = format_response(result["answer"])
+        citations = result.get("citations", [])
 
-        # Step 5: Manually extract citations from source_nodes
-        citations = []
-        source_nodes = getattr(response, "source_nodes", [])
-        for node in source_nodes:
-            metadata = getattr(node.node, "metadata", {})
-            source = metadata.get("file_name") or metadata.get("source")
-            if source and source not in citations:
-                citations.append(source)
-
-        # Step 6: Optional debug logging
+        # Optional debug logging
         if app.debug:
             if relevant_memories:
                 for i, mem in enumerate(relevant_memories[:3], 1):
@@ -183,14 +174,7 @@ def ask():
             if citations:
                 logger.debug("Retrieved Citations: %s", citations)
 
-        return jsonify(
-            {
-                "answer": formatted_answer,
-                "score": getattr(response, "score", None),
-                "metadata": getattr(response, "metadata", {}),
-                "citations": citations,
-            }
-        )
+        return jsonify({"answer": formatted_answer, "citations": citations})
 
     except Exception as e:
         logger.exception("Failed to process query '%s': %s", data.get("query", ""), e)

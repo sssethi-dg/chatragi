@@ -1,9 +1,15 @@
 """
 ChatRagi Chatbot Application
 
-This module initializes the vector index for document retrieval, processes user queries 
-using a retriever-based query engine, and stores conversation memory. Designed to support
-source citations via metadata.
+This module manages vector-based document retrieval and response generation using
+RetrieverQueryEngine and ChromaDB. It supports contextual memory, structured responses,
+and metadata-based citation extraction.
+
+Main Features:
+- Vector index refresh/load logic
+- Memory-aware response via `store_memory()`
+- Source citations for each answer
+- Optional CLI interface
 """
 
 import os
@@ -16,6 +22,7 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from chatragi.config import (
     EMBED_MODEL,
+    MAX_SOURCES,
     PERSIST_DIR,
     SIMILARITY_CUTOFF,
     SIMILARITY_TOP_K,
@@ -24,7 +31,7 @@ from chatragi.utils.chat_memory import store_memory
 from chatragi.utils.db_utils import chroma_client
 from chatragi.utils.logger_config import logger
 
-warnings.filterwarnings("ignore")  # Suppress noisy logs
+warnings.filterwarnings("ignore")
 
 # Global query engine object
 query_engine = None
@@ -34,17 +41,13 @@ def refresh_index():
     """
     Initializes or refreshes the vector index and sets up the query engine.
 
-    - If an index exists in PERSIST_DIR, it will be loaded.
-    - Otherwise, a new index is built from stored ChromaDB documents.
-
-    Raises:
-        Exception: If index creation or loading fails.
+    Loads an existing index from disk if available; otherwise builds a new one from ChromaDB.
     """
     global query_engine
 
     try:
         logger.info("Refreshing index...")
-        time.sleep(2)  # Let any pending file writes settle
+        time.sleep(2)
 
         doc_collection = chroma_client.get_or_create_collection("doc_index")
         stored_docs = doc_collection.get()
@@ -69,60 +72,81 @@ def refresh_index():
                 )
                 if doc_text
             ]
-
             storage_context = StorageContext.from_defaults(
                 vector_store=ChromaVectorStore(chroma_collection=doc_collection)
             )
-
             index = VectorStoreIndex.from_documents(
                 documents, storage_context=storage_context, embed_model=EMBED_MODEL
             )
             index.storage_context.persist(persist_dir=PERSIST_DIR)
 
-        # Create query engine with retriever
+        # Configure the retriever-based query engine
         query_engine = RetrieverQueryEngine.from_args(
             retriever=index.as_retriever(
-                similarity_top_k=SIMILARITY_TOP_K, similarity_cutoff=SIMILARITY_CUTOFF
+                similarity_top_k=SIMILARITY_TOP_K,
+                similarity_cutoff=SIMILARITY_CUTOFF,
             ),
-            include_source=True,  # Required for citation metadata
+            include_source=True,
         )
 
-        logger.info("Query engine is ready.")
-
     except Exception as e:
-        logger.exception("Failed to refresh or initialize index: %s", e)
+        logger.exception("Failed to refresh index: %s", e)
         raise
+
+
+def ask_bot(user_input: str) -> str:
+    """
+    Sends a query to the chatbot and stores the memory entry.
+
+    Args:
+        user_input (str): User's question or statement.
+        chat_id (str): Unique identifier for the session.
+
+    Returns:
+        str: Response from the chatbot.
+    """
+    if not query_engine:
+        raise RuntimeError("Query engine not initialized. Call refresh_index() first.")
+
+    response = query_engine.query(user_input)
+    store_memory(user_query=user_input, response=str(response), is_important=False)
+    return str(response)
 
 
 def ask_chatbot(query: str) -> dict:
     """
-    Sends a query to the chatbot and returns both the answer and source citations.
+    Sends a query to the chatbot and returns both the generated answer and source citations.
+
+    Filters duplicate sources but ignores similarity score due to unreliability in current setup.
 
     Args:
         query (str): The user's question.
 
     Returns:
-        dict: Contains the answer (str) and a list of citations (List[str]).
+        dict: Dictionary with:
+            - 'answer' (str): The chatbot's response.
+            - 'citations' (List[str]): List of unique source file names.
     """
     try:
         if not query_engine:
             logger.error("Query engine not initialized.")
             return {"answer": "Query engine is not initialized.", "citations": []}
 
-        # Process the user query
         response = query_engine.query(query)
-
-        # Store the interaction for future memory
         store_memory(query, str(response), is_important=False)
 
-        # Extract citations from source metadata
         citations = []
+        seen = set()
+
         for node in response.source_nodes:
             source = node.node.metadata.get("file_name") or node.node.metadata.get(
                 "source"
             )
-            if source and source not in citations:
+            if source and source not in seen:
                 citations.append(source)
+                seen.add(source)
+            if len(citations) >= MAX_SOURCES:
+                break
 
         return {"answer": str(response), "citations": citations}
 
@@ -131,7 +155,7 @@ def ask_chatbot(query: str) -> dict:
         return {"answer": f"Error: {e}", "citations": []}
 
 
-# Initialize vector index when chatbot loads
+# Auto-refresh the index when module is loaded
 try:
     refresh_index()
 except Exception as e:

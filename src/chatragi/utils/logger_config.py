@@ -1,3 +1,10 @@
+"""
+Logging configuration for the ChatRagi application.
+
+Includes both file-based and colored console logging using a custom formatter.
+Supports log rotation and minimizes noise from third-party libraries.
+"""
+
 import logging
 import sys
 from logging.handlers import RotatingFileHandler
@@ -7,8 +14,8 @@ from chatragi.config import LOG_FILE
 
 class ColorFormatter(logging.Formatter):
     """
-    Custom formatter for adding ANSI colors to console logs
-    in development mode.
+    Custom formatter for applying ANSI colors to console logs
+    based on log level (INFO, DEBUG, etc).
     """
 
     COLORS = {
@@ -22,13 +29,13 @@ class ColorFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         """
-        Format a log record with ANSI colors based on log level.
+        Format a log record with color codes.
 
         Args:
             record (logging.LogRecord): The log record to format.
 
         Returns:
-            str: The formatted log message string.
+            str: Formatted log message string with optional ANSI color.
         """
         log_fmt = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
         if record.levelno in self.COLORS:
@@ -43,13 +50,14 @@ def setup_logger() -> logging.Logger:
     Configures and returns a logger instance for the ChatRagi application.
 
     Returns:
-        logging.Logger: Configured logger instance.
+        logging.Logger: Fully configured logger instance.
     """
     logger = logging.getLogger("ChatRagi")
-    logger.setLevel(logging.INFO)  # Set default log level
+    logger.setLevel(logging.INFO)
 
+    # Prevent duplicate handlers if setup_logger is called more than once
     if not logger.handlers:
-        # Rotating File Handler (5 MB max, keep 3 backups)
+        # Rotating log file (max 5MB per file, keep 3 backups)
         file_handler = RotatingFileHandler(
             LOG_FILE, maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8"  # 5MB
         )
@@ -58,19 +66,19 @@ def setup_logger() -> logging.Logger:
         )
         file_handler.setFormatter(file_formatter)
 
-        # Console Handler with color output
+        # Console logging with color formatter
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(ColorFormatter())
 
-        # Attach handlers to logger
+        # Attach both handlers
         logger.addHandler(file_handler)
         logger.addHandler(console_handler)
 
-        # Reduce log noise from other libraries
+        # Suppress noisy logs from third-party modules
         logging.getLogger("pdfminer").setLevel(logging.ERROR)
 
     return logger
 
 
-# Instantiate the logger for use in the application
+# Instantiate the configured logger
 logger = setup_logger()
