@@ -1,15 +1,9 @@
 """
 ChatRagi Chatbot Application
 
-This module manages vector-based document retrieval and response generation using
-RetrieverQueryEngine and ChromaDB. It supports contextual memory, structured responses,
-and metadata-based citation extraction.
-
-Main Features:
-- Vector index refresh/load logic
-- Memory-aware response via `store_memory()`
-- Source citations for each answer
-- Optional CLI interface
+This module initializes the vector index for document retrieval, processes user queries 
+using the query engine, and stores conversation memory. It sets up the chatbot so that 
+users can interact via a command-line interface.
 """
 
 import os
@@ -17,7 +11,6 @@ import time
 import warnings
 
 from llama_index.core import Document, StorageContext, VectorStoreIndex
-from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.vector_stores.chroma import ChromaVectorStore
 
 from chatragi.config import (
@@ -29,42 +22,55 @@ from chatragi.config import (
 )
 from chatragi.utils.chat_memory import store_memory
 from chatragi.utils.db_utils import chroma_client
-from chatragi.utils.logger_config import logger
+from chatragi.utils.logger_config import logger  # Centralized logger
 
+# Suppress unnecessary warnings for cleaner logs
 warnings.filterwarnings("ignore")
 
-# Global query engine object
+# Global variable to store the initialized query engine
 query_engine = None
 
 
 def refresh_index():
     """
-    Initializes or refreshes the vector index and sets up the query engine.
+    Refreshes or loads the document index for querying.
 
-    Loads an existing index from disk if available; otherwise builds a new one from ChromaDB.
+    This function retrieves the document collection from ChromaDB, builds a new vector
+    index or loads an existing one from disk, and initializes the global query engine
+    used to process user queries.
+
+    Raises:
+        Exception: If an error occurs during index creation or loading.
     """
     global query_engine
 
     try:
         logger.info("Refreshing index...")
-        time.sleep(2)
+        time.sleep(2)  # Allow any pending writes to complete
 
+        # Retrieve or create the document collection in ChromaDB
         doc_collection = chroma_client.get_or_create_collection("doc_index")
         stored_docs = doc_collection.get()
 
+        # Check if an index has already been persisted
         if os.path.exists(PERSIST_DIR) and os.listdir(PERSIST_DIR):
-            logger.info("Loading existing index from disk.")
+            logger.info("Index already exists. Loading existing index.")
+
+            # Create storage context based on the existing collection
             storage_context = StorageContext.from_defaults(
                 vector_store=ChromaVectorStore(chroma_collection=doc_collection)
             )
             vector_store = ChromaVectorStore(chroma_collection=doc_collection)
+
             index = VectorStoreIndex.from_vector_store(
                 vector_store=vector_store,
                 storage_context=storage_context,
                 embed_model=EMBED_MODEL,
             )
         else:
-            logger.info("Building new vector index from ChromaDB documents.")
+            logger.info("Building a new index...")
+
+            # Prepare documents from stored data, filtering out any empty entries
             documents = [
                 Document(text=doc_text, metadata=meta)
                 for doc_text, meta in zip(
@@ -75,109 +81,81 @@ def refresh_index():
             storage_context = StorageContext.from_defaults(
                 vector_store=ChromaVectorStore(chroma_collection=doc_collection)
             )
+
+            # Create a new index and persist it to disk
             index = VectorStoreIndex.from_documents(
                 documents, storage_context=storage_context, embed_model=EMBED_MODEL
             )
             index.storage_context.persist(persist_dir=PERSIST_DIR)
 
-        # Configure the retriever-based query engine
-        query_engine = RetrieverQueryEngine.from_args(
-            retriever=index.as_retriever(
-                similarity_top_k=SIMILARITY_TOP_K,
-                similarity_cutoff=SIMILARITY_CUTOFF,
-            ),
-            include_source=True,
+        # Initialize the query engine with the defined similarity settings
+        query_engine = index.as_query_engine(
+            similarity_top_k=SIMILARITY_TOP_K, similarity_cutoff=SIMILARITY_CUTOFF
         )
+        logger.info("Index is ready.")
 
     except Exception as e:
-        logger.exception("Failed to refresh index: %s", e)
-        raise
+        logger.exception("Error refreshing index: %s", e)
+        raise  # Propagate the exception after logging
 
 
-def ask_bot(user_input: str) -> str:
+def ask_chatbot(query: str) -> str:
     """
-    Sends a query to the chatbot and stores the memory entry.
+    Processes a user's query through the chatbot and stores the conversation memory.
+
+    This function submits the query to the query engine and, upon receiving a response,
+    stores the interaction in memory for future retrieval.
 
     Args:
-        user_input (str): User's question or statement.
-        chat_id (str): Unique identifier for the session.
+        query (str): The user's input query.
 
     Returns:
-        str: Response from the chatbot.
-    """
-    if not query_engine:
-        raise RuntimeError("Query engine not initialized. Call refresh_index() first.")
+        str: The chatbot's response.
 
-    response = query_engine.query(user_input)
-    store_memory(user_query=user_input, response=str(response), is_important=False)
-    return str(response)
-
-
-def ask_chatbot(query: str) -> dict:
-    """
-    Sends a query to the chatbot and returns both the generated answer and source citations.
-
-    Filters duplicate sources but ignores similarity score due to unreliability in current setup.
-
-    Args:
-        query (str): The user's question.
-
-    Returns:
-        dict: Dictionary with:
-            - 'answer' (str): The chatbot's response.
-            - 'citations' (List[str]): List of unique source file names.
+    Raises:
+        Exception: If the query engine is not initialized.
     """
     try:
         if not query_engine:
-            logger.error("Query engine not initialized.")
-            return {"answer": "Query engine is not initialized.", "citations": []}
+            logger.error("Query engine is not initialized.")
+            return "Query engine is not initialized."
 
+        # Process the query using the query engine
         response = query_engine.query(query)
+
+        # Store the conversation memory (importance can be adjusted as needed)
         store_memory(query, str(response), is_important=False)
 
-        citations = []
-        seen = set()
-
-        for node in response.source_nodes:
-            source = node.node.metadata.get("file_name") or node.node.metadata.get(
-                "source"
-            )
-            if source and source not in seen:
-                citations.append(source)
-                seen.add(source)
-            if len(citations) >= MAX_SOURCES:
-                break
-
-        return {"answer": str(response), "citations": citations}
-
+        return str(response)
     except Exception as e:
-        logger.exception("Failed to handle query '%s': %s", query, e)
-        return {"answer": f"Error: {e}", "citations": []}
+        logger.exception("Error processing query '%s': %s", query, e)
+        return f"Error processing query: {e}"
 
 
-# Auto-refresh the index when module is loaded
+# Initialize the index at startup
 try:
     refresh_index()
 except Exception as e:
-    logger.error("Initialization failed: %s", e)
+    logger.error("Failed to initialize the index: %s", e)
 
-
+# Main command-line interface loop for the chatbot
 if __name__ == "__main__":
-    logger.info("ChatRagi CLI is active. Type 'exit' to quit.")
+    logger.info("ChatRagi Chatbot is now running. Type 'exit' to quit.")
 
     while True:
         try:
-            user_query = input("\nYour question: ")[:1500]
-            if user_query.lower() in ["exit", "quit"]:
-                print("\nGoodbye!")
+            user_query = input("\nYour question (or !command): ")[:1500]
+            if user_query.lower() in ["exit", "quit", "bye"]:
+                logger.info("Chat session ended by user.")
+                print("\nGoodbye! Chat history is saved.")
                 break
 
-            result = ask_chatbot(user_query)
-            print("\nChatRagi:\n", result["answer"])
-            if result["citations"]:
-                print("\nSources:")
-                for i, src in enumerate(result["citations"], 1):
-                    print(f"{i}. {src}")
+            if not query_engine:
+                print("Query engine is not initialized. Skipping query.")
+                continue
 
+            # Get response from the chatbot
+            answer = ask_chatbot(user_query)
+            print("\nChatRagi Response:", answer)
         except Exception as e:
-            logger.exception("Unexpected CLI error: %s", e)
+            logger.exception("Unexpected error in main loop: %s", e)
