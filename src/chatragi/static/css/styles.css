@@ -99,6 +99,25 @@ body {
   font-size: 14px;
 }
 
+.typing-indicator .dot {
+  animation: blink 1.2s infinite;
+  font-weight: bold;
+}
+
+.typing-indicator .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
 /* ---------- Input Styling ---------- */
 #input-area {
   display: flex;
@@ -308,13 +327,16 @@ button:focus-visible {
   margin-top: 8px;
   font-size: 14px;
   color: var(--meta-color);
-  display: none;
-  transition: all 0.3s ease;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
 }
 
 .mem-details.visible,
 .doc-details.visible {
-  display: block;
+  max-height: 500px; /* Arbitrary large height */
+  opacity: 1;
 }
 
 /* ---------- Panel Headers ---------- */
@@ -350,6 +372,14 @@ button:focus-visible {
 #close-memory-btn:hover,
 #close-doc-btn:hover {
   background-color: var(--danger-hover);
+}
+
+.caret-icon {
+  display: inline-block;
+  font-size: 14px;            /* Slightly larger */
+  font-weight: bold;          /* Bolder if supported */
+  transition: transform 0.3s ease;
+  transform-origin: center left;
 }
 
 /* ---------- Pagination ---------- */
@@ -424,6 +454,10 @@ button:focus-visible {
 
 .toast.error {
   background-color: #dc3545;
+}
+
+.toast.info {
+  background-color: #28a745;
 }
 
 @keyframes fadeInOut {

@@ -115,6 +115,7 @@ DYNAMIC_CHUNKING = {
 DEBUG_MODE = os.getenv("DEBUG_MODE", "False").lower() == "true"
 
 if DEBUG_MODE:
+    logger.setLevel(logging.DEBUG)
     logger.info("Debug Mode: ON")
     logger.info("Using LLM Model: %s", LLM_MODEL_NAME)
     logger.info("Using Embedding Model: %s", EMBED_MODEL_NAME)
@@ -125,3 +126,8 @@ if DEBUG_MODE:
 
 # Prevent tokenizer-related deadlocks in parallel environments
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+# Ensure root and 'ChatRagi' loggers capture debug output if DEBUG_MODE is enabled
+if DEBUG_MODE:
+    logging.getLogger().setLevel(logging.DEBUG)  # root logger
+    logging.getLogger("ChatRagi").setLevel(logging.DEBUG)  # project logger

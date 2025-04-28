@@ -34,13 +34,16 @@ def delete_non_important_memories() -> None:
 
     try:
         results = memory_collection.get()
+        # documents = results.get("documents", [])
+        metadatas = results.get("metadatas", [])
+        ids = results.get("ids", [])
+
         ids_to_delete = []
 
-        for doc, meta in zip(
-            results.get("documents", []), results.get("metadatas", [])
-        ):
+        for meta, doc_id in zip(metadatas, ids):
+            meta = meta[0] if isinstance(meta, list) and meta else meta
             if not isinstance(meta, dict):
-                continue  # Skip entries without valid metadata
+                continue
 
             timestamp = meta.get("timestamp")
             if not timestamp:
@@ -49,13 +52,8 @@ def delete_non_important_memories() -> None:
 
             stored_time = datetime.fromisoformat(timestamp)
 
-            # Mark for deletion if not important and older than cutoff
             if stored_time < cutoff_date and not meta.get("important", False):
-                doc_id = meta.get("id")
-                if doc_id:
-                    ids_to_delete.append(doc_id)
-                else:
-                    logger.warning("Missing 'id' in metadata: %s", meta)
+                ids_to_delete.append(doc_id)
 
         if ids_to_delete:
             memory_collection.delete(ids=ids_to_delete)
@@ -96,7 +94,7 @@ def list_collections() -> None:
     try:
         collections = chroma_client.list_collections()
         if not collections:
-            logger.warning("No collections found in ChromaDB.")
+            logger.info("No collections found in ChromaDB.")
         else:
             logger.info("Stored Collections:")
             for collection in collections:
@@ -117,12 +115,13 @@ def list_documents() -> list[dict]:
         metadatas = stored_docs.get("metadatas", [])
 
         if not metadatas:
-            logger.warning("No documents found in ChromaDB.")
+            logger.info("No documents found in ChromaDB.")
             return []
 
         file_stats = {}
 
         for meta in metadatas:
+            meta = meta[0] if isinstance(meta, list) and meta else meta
             if not isinstance(meta, dict):
                 continue
 

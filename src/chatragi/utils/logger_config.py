@@ -53,7 +53,7 @@ def setup_logger() -> logging.Logger:
         logging.Logger: Fully configured logger instance.
     """
     logger = logging.getLogger("ChatRagi")
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)  # Set to DEBUG for detailed logs
 
     # Prevent duplicate handlers if setup_logger is called more than once
     if not logger.handlers:

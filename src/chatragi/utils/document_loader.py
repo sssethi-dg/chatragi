@@ -1,9 +1,8 @@
 """
 Document Loader for ChatRagi
 
-This module handles the ingestion of various document types (PDF, CSV, JSON, TXT),
-splits their text into manageable chunks with metadata, and checks for duplicates 
-before adding the processed chunks into the vector store (ChromaDB) for later retrieval.
+Handles ingestion of PDF, CSV, JSON, TXT documents into ChromaDB.
+Splits files into chunks, attaches metadata, and checks for duplication.
 """
 
 import hashlib
@@ -26,9 +25,9 @@ from chatragi.config import (
     PERSIST_DIR,
 )
 from chatragi.utils.db_utils import chroma_client
-from chatragi.utils.logger_config import logger  # Centralized logging configuration
+from chatragi.utils.logger_config import logger
 
-# Optional dependency for advanced token counting; falls back to word count if unavailable.
+# Optional tokenizer for token estimation
 try:
     import tiktoken
 
@@ -39,10 +38,10 @@ except ImportError:
 
 def move_to_archive(filename: str):
     """
-    Moves a processed file to the archive folder to prevent reprocessing.
+    Moves a processed file to the archive folder to avoid reprocessing.
 
     Args:
-        filename (str): Name of the file to be archived.
+        filename (str): Name of the file.
     """
     src_path = os.path.join(DATA_FOLDER, filename)
     dest_path = os.path.join(ARCHIVE_FOLDER, filename)
@@ -51,7 +50,6 @@ def move_to_archive(filename: str):
         logger.warning("File '%s' not found in '%s'. Skipping.", filename, DATA_FOLDER)
         return
 
-    # Prevent overwriting by appending a counter if the file already exists in the archive.
     if os.path.exists(dest_path):
         base, ext = os.path.splitext(filename)
         counter = 1
@@ -60,74 +58,69 @@ def move_to_archive(filename: str):
         dest_path = os.path.join(ARCHIVE_FOLDER, f"{base}_{counter}{ext}")
 
     shutil.move(src_path, dest_path)
-    logger.info("Moved file '%s' to archive successfully.", filename)
+    logger.info("Moved file '%s' to archive.", filename)
 
 
 def compute_file_hash(file_path: str) -> str:
     """
-    Computes a SHA-256 hash for a file's contents for duplicate detection.
+    Computes a SHA-256 hash of file contents.
 
     Args:
         file_path (str): Path to the file.
 
     Returns:
-        str: SHA-256 hash of the file content, or None if an error occurs.
+        str: File hash or empty string if error.
     """
     hasher = hashlib.sha256()
     try:
         with open(file_path, "rb") as f:
-            # Read file in small chunks to conserve memory.
             while chunk := f.read(8192):
                 hasher.update(chunk)
         return hasher.hexdigest()
     except Exception as e:
-        logger.exception(f"Error computing hash for '{file_path}': {e}")
-        return ""  # Return empty string on error
+        logger.exception("Error computing hash for '%s': %s", file_path, e)
+        return ""
 
 
 def estimate_tokens(text: str) -> int:
     """
-    Estimates the number of tokens in a text string based on word count.
+    Estimates number of tokens in the given text.
 
     Args:
         text (str): Input text.
 
     Returns:
-        int: Estimated token count.
+        int: Approximate token count.
     """
     return len(text.split())
 
 
 def split_text_into_chunks(
     text: str, max_tokens: int = CONTEXT_WINDOW, overlap_ratio: float = 0.2
-) -> list:
+) -> List[str]:
     """
-    Splits text into overlapping chunks based on estimated token count and sentence boundaries.
+    Splits text into overlapping chunks based on sentences.
 
     Args:
-        text (str): The full text to be chunked.
-        max_tokens (int): Maximum tokens allowed per chunk.
-        overlap_ratio (float): Fraction of tokens to overlap between consecutive chunks.
+        text (str): Full document text.
+        max_tokens (int): Maximum tokens per chunk.
+        overlap_ratio (float): Overlap fraction between chunks.
 
     Returns:
-        list: List of text chunks.
+        List[str]: List of text chunks.
     """
-    # Split text at sentence-ending punctuation followed by whitespace.
     sentences = re.split(r"(?<=[.!?])\s+", text)
     chunks: List[str] = []
     current_chunk: List[str] = []
-    # Determine the number of words to retain from the previous chunk as overlap.
     overlap = int(max_tokens * overlap_ratio)
 
     for sentence in sentences:
         tokens_in_sentence = estimate_tokens(sentence)
         tokens_in_chunk = sum(estimate_tokens(s) for s in current_chunk)
 
-        # If adding the sentence does not exceed max_tokens, add it to the current chunk.
         if tokens_in_chunk + tokens_in_sentence <= max_tokens:
             current_chunk.append(sentence)
         else:
-            # Append the current chunk and start a new chunk with overlapping words.
             chunks.append(" ".join(current_chunk))
             current_chunk = current_chunk[-overlap:] + [sentence]
 
@@ -137,20 +130,19 @@ def split_text_into_chunks(
     return chunks
 
 
-def chunk_text(text: str, file_name: str, source: str) -> list:
+def chunk_text(text: str, file_name: str, source: str) -> List[dict]:
     """
-    Splits document text into structured chunks and enriches each with metadata.
+    Prepares structured chunks with metadata for a document.
 
     Args:
-        text (str): Full text extracted from the document.
-        file_name (str): Name of the source file.
-        source (str): Identifier for the type of file (e.g., 'pdf', 'csv').
+        text (str): Full document text.
+        file_name (str): Source filename.
+        source (str): File source type (e.g., 'pdf', 'csv').
 
     Returns:
-        list: List of dictionaries, each containing a text chunk and its metadata.
+        List[dict]: Chunk metadata.
     """
     chunks = split_text_into_chunks(text)
-    # Add an MD5 hash for each chunk to help detect duplicates at the chunk level.
     return [
         {
             "text": chunk,
@@ -165,15 +157,15 @@ def chunk_text(text: str, file_name: str, source: str) -> list:
     ]
 
 
-def load_pdf(file_path: str) -> list:
+def load_pdf(file_path: str) -> List[dict]:
     """
-    Loads text from a PDF file, splits it into chunks, and attaches metadata.
+    Loads text from a PDF file.
 
     Args:
-        file_path (str): Path to the PDF file.
+        file_path (str): Path to PDF file.
 
     Returns:
-        list: List of text chunks with metadata.
+        List[dict]: Chunked document.
     """
     try:
         with pdfplumber.open(file_path) as pdf:
@@ -195,15 +187,15 @@ def load_pdf(file_path: str) -> list:
         return []
 
 
-def load_csv(file_path: str) -> list:
+def load_csv(file_path: str) -> List[dict]:
     """
-    Loads text from a CSV file, converts it to a string, and splits it into chunks.
+    Loads text from a CSV file.
 
     Args:
-        file_path (str): Path to the CSV file.
+        file_path (str): Path to CSV file.
 
     Returns:
-        list: List of text chunks with metadata.
+        List[dict]: Chunked document.
     """
     try:
         df = pd.read_csv(file_path)
@@ -220,23 +212,21 @@ def load_csv(file_path: str) -> list:
         return []
 
 
-def load_json(file_path: str) -> list:
+def load_json(file_path: str) -> List[dict]:
     """
-    Loads text from a JSON or JSON Lines file and splits it into chunks.
+    Loads text from a JSON or JSONL file.
 
     Args:
-        file_path (str): Path to the JSON file.
+        file_path (str): Path to JSON file.
 
     Returns:
-        list: List of text chunks with metadata.
+        List[dict]: Chunked document.
     """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             try:
-                # Try standard JSON first
                 data = json.load(f)
             except json.JSONDecodeError:
-                # Fallback to JSON Lines
                 f.seek(0)
                 data = [json.loads(line) for line in f if line.strip()]
 
@@ -244,14 +234,8 @@ def load_json(file_path: str) -> list:
             logger.warning("Skipping empty JSON: %s", os.path.basename(file_path))
             return []
 
-        # Determine if it's JSONL or plain JSON
-        source = (
-            "jsonl"
-            if isinstance(data, list) and all(isinstance(x, dict) for x in data)
-            else "json"
-        )
+        source = "jsonl" if isinstance(data, list) else "json"
         text = json.dumps(data, indent=2)
-
         return chunk_text(text, os.path.basename(file_path), source)
     except Exception as e:
         logger.exception(
@@ -260,22 +244,22 @@ def load_json(file_path: str) -> list:
         return []
 
 
-def load_txt(file_path: str) -> list:
+def load_txt(file_path: str) -> List[dict]:
     """
-    Loads text from a TXT or Markdown file and splits it into chunks.
+    Loads text from a TXT or Markdown file.
 
     Args:
-        file_path (str): Path to the TXT or Markdown file.
+        file_path (str): Path to TXT/MD file.
 
     Returns:
-        list: List of text chunks with metadata.
+        List[dict]: Chunked document.
     """
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             text = f.read().strip()
 
         if not text:
-            logger.warning("Skipping empty TXT file: %s", os.path.basename(file_path))
+            logger.warning("Skipping empty TXT: %s", os.path.basename(file_path))
             return []
 
         return chunk_text(text, os.path.basename(file_path), "text")
@@ -286,15 +270,15 @@ def load_txt(file_path: str) -> list:
         return []
 
 
-def load_document(file_path: str) -> list:
+def load_document(file_path: str) -> List[dict]:
     """
-    Dispatches the loading process to the appropriate loader function based on file extension.
+    Loads document based on its file extension.
 
     Args:
-        file_path (str): Path to the document file.
+        file_path (str): File path.
 
     Returns:
-        list: List of text chunks with metadata.
+        List[dict]: Chunked document.
     """
     loaders = {
         ".pdf": load_pdf,
@@ -306,7 +290,7 @@ def load_document(file_path: str) -> list:
 
     ext = os.path.splitext(file_path)[1].lower()
     if ext not in loaders:
-        logger.warning("Unsupported file format: %s. Skipping.", file_path)
+        logger.warning("Unsupported file format: %s", file_path)
         return []
 
     return loaders[ext](file_path)
@@ -314,36 +298,29 @@ def load_document(file_path: str) -> list:
 
 def process_new_documents(file_path: str):
     """
-    Processes a new document by loading its content, splitting it into chunks,
-    checking for duplicates, and updating the ChromaDB index.
+    Processes a new file: splits, checks for duplicates, and indexes into ChromaDB.
 
     Args:
-        file_path (str): Path to the document being processed.
+        file_path (str): Full path to the new document.
     """
     logger.info("Processing file: %s", os.path.basename(file_path))
 
-    # Compute a hash of the entire file for duplicate detection.
     file_hash = compute_file_hash(file_path)
     if not file_hash:
-        logger.warning("Hash computation failed for %s. Skipping.", file_path)
+        logger.warning("Hash computation failed for '%s'. Skipping.", file_path)
         return
 
-    # Load document and split into text chunks.
     chunks = load_document(file_path)
     if not chunks:
-        logger.warning("No valid content found in %s. Skipping.", file_path)
+        logger.warning("No valid content found in '%s'. Skipping.", file_path)
         return
 
-    # Retrieve the existing documents from ChromaDB.
     doc_collection = chroma_client.get_or_create_collection("doc_index")
     stored_docs = doc_collection.get()
-
-    # Build a set of existing chunk hashes for duplicate detection.
     existing_hashes = {
         meta.get("hash", "") for meta in stored_docs.get("metadatas", [])
     }
 
-    # If any chunk's hash is already present, treat the file as duplicate.
     if any(chunk["metadata"]["hash"] in existing_hashes for chunk in chunks):
         logger.warning(
             "Duplicate document detected: %s. Skipping indexing.",
@@ -353,22 +330,20 @@ def process_new_documents(file_path: str):
         return
 
     try:
-        # Convert each chunk into a Document object for indexing.
-        document_objects = [
+        documents = [
             Document(text=chunk["text"], metadata=chunk["metadata"]) for chunk in chunks
         ]
 
-        # Build the vector store index and persist it.
         storage_context = StorageContext.from_defaults(
             vector_store=ChromaVectorStore(chroma_collection=doc_collection)
         )
         index = VectorStoreIndex.from_documents(
-            document_objects, storage_context=storage_context, embed_model=EMBED_MODEL
+            documents, storage_context=storage_context, embed_model=EMBED_MODEL
         )
         index.storage_context.persist(persist_dir=PERSIST_DIR)
 
         logger.info(
-            "Successfully indexed %d chunks from '%s'",
+            "Successfully indexed %d chunks from '%s'.",
             len(chunks),
             os.path.basename(file_path),
         )

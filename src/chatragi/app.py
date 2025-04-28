@@ -11,6 +11,8 @@ This Flask backend powers the ChatRagi chatbot interface. It includes endpoints 
 The application integrates contextual memory retrieval, few-shot prompting, and markdown formatting.
 """
 
+import re
+
 import markdown  # type: ignore[import]
 from flask import Flask, jsonify, render_template, request
 from markdown.extensions.fenced_code import FencedCodeExtension  # type: ignore[import]
@@ -18,9 +20,16 @@ from markdown.extensions.fenced_code import FencedCodeExtension  # type: ignore[
 from chatragi.utils.chat_memory import fetch_all_memories, retrieve_memory, store_memory
 from chatragi.utils.chatbot import query_engine, refresh_index
 from chatragi.utils.db_utils import list_documents
-from chatragi.utils.logger_config import logger  # Centralized logger
+from chatragi.utils.error_handler import handle_exception
+from chatragi.utils.logger_config import logger
+
+# Maximum number of citations to return
+MAX_SOURCES = 3
 
 app = Flask(__name__)
+
+# Register global error handler
+app.register_error_handler(Exception, handle_exception)
 
 
 @app.route("/")
@@ -42,11 +51,6 @@ def format_response(response_text: str) -> str:
     """
     Formats chatbot responses using Markdown and fixes common formatting inconsistencies.
 
-    This function:
-    - Converts numbered lists to markdown-style bullets
-    - Collapses redundant blank lines inside list blocks
-    - Maintains consistent formatting for code blocks
-
     Args:
         response_text (str): Raw LLM-generated response text.
 
@@ -55,24 +59,52 @@ def format_response(response_text: str) -> str:
     """
 
     def normalize_markdown_spacing(text: str) -> str:
+        """
+        Cleans up LLM output into better Markdown:
+        - Converts numbered lists like "1. Item" into "- Item"
+        - Avoids extra blank lines inside lists
+        - Removes redundant blank lines
+        """
         lines = text.splitlines()
-        cleaned: list[str] = []
+        cleaned = []
+
+        inside_section = False
 
         for line in lines:
             stripped = line.strip()
 
-            # Convert numbered list items to dash format (e.g., "1. Item" → "- Item")
-            if stripped and any(stripped.startswith(f"{i}. ") for i in range(1, 10)):
+            # Convert numbered lists to dash
+            if re.match(r"^\d+\.\s", stripped):
                 stripped = "- " + stripped.split(". ", 1)[1]
 
-            # Avoid extra blank lines after bullet items
-            if stripped == "" and cleaned and cleaned[-1].strip().startswith("-"):
+            # Detect section headers like - **Details**:
+            if re.match(r"-\s\*\*.*\*\*:", stripped):
+                inside_section = True
+                cleaned.append(stripped)
                 continue
 
-            # Preserve code blocks and normal lines
-            cleaned.append(stripped)
+            # If inside a section and line starts with "-", indent it
+            if inside_section and stripped.startswith("- "):
+                cleaned.append("  " + stripped)
+            else:
+                inside_section = False
+                cleaned.append(stripped)
 
-        return "\n".join(cleaned)
+        # ==== NEW CLEANUP: remove consecutive blank lines ====
+        final_lines = []
+        skip_next_blank = False
+        for line in cleaned:
+            if skip_next_blank and line == "":
+                skip_next_blank = False
+                continue
+
+            final_lines.append(line)
+
+            # If this is a section header like "- **Details**:"
+            if re.match(r"-\s\*\*.*\*\*:", line.strip()):
+                skip_next_blank = True
+
+        return "\n".join(final_lines)
 
     try:
         cleaned_text = normalize_markdown_spacing(response_text)
@@ -100,7 +132,10 @@ def format_structured_prompt(user_query: str, retrieved_memories: list[str]) -> 
     """
     intro = (
         "You are ChatRagi, a helpful assistant. Format your answers clearly using Markdown with:\n"
-        "- **Summary**\n- **Details**\n- **Tips** (if applicable)\n"
+        "- **Summary**: Provide a one or two sentence summary.\n"
+        "- **Details**: Use bullet points for explanations or steps. Use indented lists inside Details sections where appropriate (indent sub-points under main bullets).\n"
+        "- **Tips**: Offer best practices or optimization tips as bullet points.\n\n"
+        "Ensure answers are cleanly structured with Markdown, and properly use nested lists where necessary."
     )
 
     examples = (
@@ -137,13 +172,11 @@ def ask():
             "query": "Your question here"
         }
 
-    Returns:
-        JSON response:
+    Response JSON:
         {
-            "answer": "<formatted markdown HTML>",
-            "score": <optional model score>,
-            "metadata": <model metadata>,
-            "citations": [<source names>]
+            "answer": "<Markdown formatted HTML>",
+            "raw_answer": "<plain model text>",
+            "citations": ["source1", "source2", "source3"]
         }
     """
     try:
@@ -154,40 +187,33 @@ def ask():
             logger.error("No query provided in request.")
             return jsonify({"error": "No query provided"}), 400
 
-        # Step 1: Retrieve memory context
         relevant_memories = retrieve_memory(user_query)
-
-        # Step 2: Build structured prompt with memory context
         full_prompt = format_structured_prompt(user_query, relevant_memories)
 
-        # Step 3: Query the LLM
         response = query_engine.query(full_prompt)
 
-        # Step 4: Format the markdown output to HTML
-        formatted_answer = format_response(response.response)
+        raw_answer = getattr(response, "response", str(response)).strip()
 
-        # Step 5: Manually extract citations from source_nodes
         citations = []
         source_nodes = getattr(response, "source_nodes", [])
+        seen = set()
         for node in source_nodes:
             metadata = getattr(node.node, "metadata", {})
             source = metadata.get("file_name") or metadata.get("source")
-            if source and source not in citations:
+            if source and source not in seen:
                 citations.append(source)
+                seen.add(source)
+            if len(citations) >= MAX_SOURCES:
+                break
 
-        # Step 6: Optional debug logging
-        if app.debug:
-            if relevant_memories:
-                for i, mem in enumerate(relevant_memories[:3], 1):
-                    logger.debug("Retrieved Memory %d:\n%s", i, mem)
-            if citations:
-                logger.debug("Retrieved Citations: %s", citations)
+        formatted_answer = format_response(raw_answer)
+
+        store_memory(user_query, raw_answer, is_important=False)
 
         return jsonify(
             {
                 "answer": formatted_answer,
-                "score": getattr(response, "score", None),
-                "metadata": getattr(response, "metadata", {}),
+                "raw_answer": raw_answer,
                 "citations": citations,
             }
         )
