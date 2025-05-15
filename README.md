@@ -371,10 +371,9 @@ Use the **Select Tone** dropdown to customize how ChatRagi responds:
 
 ## Contribution Status
 
-This project is currently under active private development.
-
-Public contributions are not open yet, but I do plan to support community involvement in a future release.  
-Feel free to follow along — and stay tuned for updates!
+> ⚠️ This repository is currently **read-only**.  
+> Contributions, issues, and pull requests are disabled until a future release.  
+> Feel free to clone, explore, and use the project locally!  
 
 ---
 
