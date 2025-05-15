@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ChatRagi - Your local AI RAG chatbot assistant.">
+    <meta name="theme-color" content="#007bff">
+    
+    <title>ChatRagi - Local RAG Chatbot</title>
+    
+    <!-- Primary Favicon -->
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+    
+    <!-- PNG Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+    
+    <!-- Apple Touch Icon (for iPhones/iPads) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon-32x32.png">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Markdown Library -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Main JavaScript (deferred loading) -->
+    <script src="/static/js/scripts.js" defer></script>
+</head>
+<body>
+    <noscript>
+        <div class="noscript-warning">
+            JavaScript is required to use ChatRagi. Please enable it in your browser.
+        </div>
+    </noscript>
+
+    <div id="chat-container" class="shared-container">
+        <header>
+            <h1>ChatRagi</h1>
+            <div class="header-actions">
+                <button id="mark-important-btn" class="action-button" title="Mark as Important">
+                    <i class="fa-regular fa-bookmark"></i> Mark as Important
+                </button>
+                <button id="download-btn" class="action-button" title="Download Chat">
+                    <i class="fa-solid fa-download"></i> Download Chat
+                </button>
+                <button id="theme-toggle-btn" class="action-button" title="Toggle Dark Mode">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Chat Output -->
+        <div id="chat-box" role="log" aria-live="polite"></div>
+
+        <!-- Chat Input and Persona Selector -->
+        <!-- Chat Input -->
+        <div id="input-area">
+            <div class="persona-selector">
+                <label for="persona-select" class="persona-label">
+                    🎭&nbsp;&nbsp;Select Tone:
+                </label>
+                <select id="persona-select" title="Choose how ChatRagi responds">
+                    <option value="default">🧠&nbsp;&nbsp;Neutral</option>
+                    <option value="professional">💼&nbsp;&nbsp;Professional</option>
+                    <option value="witty">😄&nbsp;&nbsp;Witty</option>
+                </select>
+            </div>
+
+            <textarea id="user-input" rows="3" placeholder="Ask me anything..." autocomplete="off"></textarea>
+
+            <button id="send-btn" title="Send Message">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="button-group">
+            <button id="show-memory-btn" class="action-button"><i class="fa-solid fa-clock-rotate-left"></i> Show Saved Memory</button>
+            <button id="show-doc-list" class="action-button"><i class="fa-solid fa-list"></i> List Sources</button>
+            <button id="refresh-btn" class="action-button"><i class="fa-solid fa-sync"></i> Refresh Index</button>
+            <button id="clear-chat-btn" class="action-button"><i class="fa-solid fa-trash"></i> Clear</button>
+        </div>
+    </div>
+
+    <!-- Memory Panel -->
+    <div id="memory-container" class="container-slide shared-container">
+        <div class="panel-header">  
+            <h2>Chat Memory</h2>
+            <button id="close-memory-btn"><i class="fa-solid fa-circle-xmark"></i> Hide Memory</button>
+        </div>
+        <div id="memory-box"></div>
+    </div>
+
+    <!-- Source Panel -->
+    <div id="source-container" class="container-slide shared-container">
+        <div class="panel-header">
+            <h2>Source Documents</h2>
+            <button id="close-doc-btn"><i class="fa-solid fa-circle-xmark"></i> Hide Source</button>
+        </div>
+        <div id="source-box"></div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+</body>
+</html>

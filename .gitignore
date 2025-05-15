@@ -1,0 +1,22 @@
+# Python
+.venv/
+**/__pycache__/
+*.pyc
+
+# IDEs and Editors
+.vscode/
+.DS_Store
+
+# Logs and Environment
+logs/
+*.log
+.env
+
+# Ignore build artifacts
+*.egg-info/
+
+# Runtime and App Storage
+archive/
+data/
+chroma_db/
+storage/

@@ -1,0 +1,538 @@
+/* ---------- Theme Variables ---------- */
+:root {
+  --accent-color: #007bff;
+  --accent-hover: #0056b3;
+  --danger-color: #dc3545;
+  --danger-hover: #c82333;
+  --background-color: #f4f7fa;
+  --panel-bg: #ffffff;
+  --card-bg: #f9f9f9;
+  --text-color: #1c1c1e;
+  --border-color: #ccc;
+  --meta-color: #555;
+  --muted-color: #666;
+  --toast-bg: #333;
+  --inline-code-bg: #f0f0f0;
+  --inline-code-text: #d6336c;
+  --block-code-bg: #272822;
+  --block-code-text: #f8f8f2;
+}
+
+body.dark-mode {
+  --accent-color: #4dabf7;
+  --accent-hover: #1c7ed6;
+  --danger-color: #f25f5c;
+  --danger-hover: #c0392b;
+  --background-color: #1e1e1e;
+  --panel-bg: #2c2c2c;
+  --card-bg: #333;
+  --text-color: #e0e0e0;
+  --border-color: #555;
+  --meta-color: #ccc;
+  --muted-color: #aaa;
+  --toast-bg: #444;
+  --inline-code-bg: #2c2c2c;
+  --inline-code-text: #ffa7c4;
+  --block-code-bg: #1e1e1e;
+  --block-code-text: #f1f1f1;
+}
+
+body.dark-mode #persona-select {
+  background-color: #2c2c2c; /* Slightly darker than panel-bg */
+  color: var(--text-color);
+  border: 1.8px solid var(--border-color);
+}
+
+body.dark-mode #persona-select:hover,
+body.dark-mode #persona-select:focus {
+  border-color: var(--accent-color);
+  background-color: #353535; /* Slightly lighter on hover/focus */
+}
+/* Auto-enable dark mode if user's system prefers it */
+@media (prefers-color-scheme: dark) {
+  body:not(.dark-mode) {
+    background-color: var(--background-color);
+    color: var(--text-color);
+  }
+}
+
+@media (max-width: 600px) {
+  .persona-selector {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ---------- Base Styling ---------- */
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+/* Shared style for containers */
+.shared-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: var(--panel-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ---------- Container ---------- */
+#chat-container {
+  display: flex;
+  flex-direction: column;
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  box-sizing: border-box;
+  background: var(--panel-bg);
+  border-radius: 12px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ---------- Header Actions ---------- */
+.header-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  justify-content: right;
+}
+
+.header-actions button {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.header-actions button:hover {
+  background-color: var(--accent-hover);
+}
+
+/* ---------- Chat Box ---------- */
+#chat-box {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 15px;
+  border: 1px solid var(--border-color);
+  background-color: var(--panel-bg);
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  min-height: 200px; /* optional fallback */
+}
+
+.typing-indicator .dot {
+  animation: blink 1.2s infinite;
+  font-weight: bold;
+}
+
+.typing-indicator .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+/* ---------- Input Styling ---------- */
+#input-area {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  flex-shrink: 0;
+  padding-top: 8px;
+}
+
+#user-input {
+  flex-grow: 1;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1.8px solid var(--border-color);
+  background-color: var(--panel-bg);
+  color: var(--text-color);
+}
+
+#user-input:focus {
+  border-color: var(--accent-color);
+}
+
+#send-btn {
+  padding: 12px 16px;
+  font-size: 18px;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+#send-btn:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+/* ---------- Persona Selector ---------- */
+.persona-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.persona-label {
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+#persona-select {
+  padding: 10px 18px; /* wider padding */
+  font-size: 15px;    /* slightly larger font */
+  border: 1.8px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--panel-bg);
+  color: var(--text-color);
+  transition: border-color 0.2s ease;
+  letter-spacing: 0.4px; /* subtle breathing space */
+}
+#persona-select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+#persona-select option {
+  padding: 10px;
+  font-size: 15px;
+}
+
+/* ---------- Action Buttons ---------- */
+.action-button {
+  padding: 12px 14px;
+  border-radius: 6px;
+  background-color: var(--accent-color);
+  color: white;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-button:hover {
+  background-color: var(--accent-hover);
+}
+
+/* ---------- Accessibility: Focus States ---------- */
+button:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* ---------- Message Styling ---------- */
+.user-message,
+.ai-message {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  max-width: 100%;
+}
+
+.user-message {
+  align-self: flex-end;
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.ai-message {
+  align-self: flex-start;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.message-label {
+  font-weight: bold;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.message-content {
+  font-size: 15px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.message-content ul {
+  margin-left: 1.5em;
+  padding-left: 0;
+  list-style-type: disc;
+}
+
+.message-content li {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+/* ---------- Code Styling ---------- */
+.message-content code:not(pre code) {
+  background-color: var(--inline-code-bg);
+  color: var(--inline-code-text);
+  padding: 3px 6px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  white-space: break-spaces;
+}
+
+.message-content pre code {
+  background-color: var(--block-code-bg);
+  color: var(--block-code-text);
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+  overflow-x: auto;
+  display: block;
+  line-height: 1.5;
+  border: 1px solid var(--border-color);
+  margin: 10px 0;
+}
+
+/* ---------- Bottom Button Group ---------- */
+.button-group {
+  display: flex;
+  justify-content: right;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-top: 15px;
+}
+
+/* ---------- Slide-Out Containers ---------- */
+.container-slide {
+  display: none;
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: var(--panel-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.container-slide.active {
+  display: block;
+}
+
+#memory-box,
+#source-box {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 15px;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* ---------- Memory/Doc Cards ---------- */
+.memory-card,
+.document-card {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  background-color: var(--card-bg);
+  transition: box-shadow 0.2s ease;
+}
+
+.memory-card:hover,
+.document-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.mem-header,
+.doc-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 15px;
+  padding: 4px 0;
+}
+
+.mem-details,
+.doc-details {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--meta-color);
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+}
+
+.mem-details.visible,
+.doc-details.visible {
+  max-height: 500px; /* Arbitrary large height */
+  opacity: 1;
+}
+
+/* ---------- Panel Headers ---------- */
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+/* ---------- Close Buttons ---------- */
+.panel-header button,
+#close-memory-btn,
+#close-doc-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  background-color: var(--danger-color);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.panel-header button:hover,
+#close-memory-btn:hover,
+#close-doc-btn:hover {
+  background-color: var(--danger-hover);
+}
+
+.caret-icon {
+  display: inline-block;
+  font-size: 14px;            /* Slightly larger */
+  font-weight: bold;          /* Bolder if supported */
+  transition: transform 0.3s ease;
+  transform-origin: center left;
+}
+
+/* ---------- Pagination ---------- */
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  margin-bottom: 15px;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 14px;
+  color: var(--text-color);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pagination-controls .page-status {
+  flex-grow: 1;
+  text-align: center;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pagination-controls button {
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: none;
+  background-color: var(--accent-color);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+}
+
+.pagination-controls button:disabled {
+  background-color: #ccc;
+  color: #eee;
+  cursor: not-allowed;
+}
+
+/* ---------- Toast Notifications ---------- */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 300px;
+}
+
+.toast {
+  background-color: var(--toast-bg);
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  font-size: 14px;
+  opacity: 0;
+  animation: fadeInOut 2s ease forwards;
+}
+
+.toast.success {
+  background-color: #28a745;
+}
+
+.toast.error {
+  background-color: #dc3545;
+}
+
+.toast.info {
+  background-color: #28a745;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10%, 90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}

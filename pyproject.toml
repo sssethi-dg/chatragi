@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chatragi"
+version = "0.1.0"
+authors = [
+  { name = "Simer Singh Sethi", email = "simer@disruptivegeek.net" }
+]
+description = "ChatRagi - AI-Powered Local RAG Chatbot"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+keywords = ["AI", "chatbot", "RAG", "LLM", "local", "open-source"]
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
+
+dependencies = [
+  "chromadb>=0.4.15,<1.0",
+  "flask>=2.2,<3.0",
+  "pdfplumber>=0.9.0",
+  "langchain>=0.3.22",
+  "langchain-community>=0.3.20",
+  "langchain-ollama>=0.3.0",
+  "llama-index>=0.9.0",
+  "llama-index-embeddings-huggingface>=0.1.0",
+  "llama-index-embeddings-ollama>=0.1.0",
+  "llama-index-vector-stores-chroma>=0.1.0",
+  "llama-index-llms-ollama>=0.1.0",
+  "tiktoken>=0.5.1",
+  "watchdog>=3.0.0",
+  "markdown>=3.4.0",
+  "types-Markdown>=3.4.0",
+  "python-dotenv>=1.0.0",
+  "numpy==1.26.4",
+  "pandas>=2.0.0",
+  "ipykernel>=6.29.4",
+  "ipywidgets>=8.1.2"
+]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0.0",
+  "black>=23.0.0",
+  "flake8>=6.0.0",
+  "isort>=5.12.0",
+  "mypy>=1.0.0",
+  "pre-commit>=3.0.0"
+]
