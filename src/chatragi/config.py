@@ -2,8 +2,9 @@
 Configuration settings for the ChatRagi chatbot application.
 
 This module centralizes all configuration parameters used across the system.
-It includes file paths, model selections, query settings, embedding choices, 
-and performance optimizations. All values can be overridden using environment variables.
+It includes file paths, model selections, query settings, embedding choices,
+and performance optimizations. All values can be overridden using environment
+variables.
 """
 
 import logging
@@ -43,8 +44,8 @@ LOG_FILE = os.path.join(LOG_FOLDER, LOG_FILE_NAME)
 
 # ------------------- LLM Model Configuration -------------------
 
-# Common LLM options: "llama3.2:3b", "phi4:14b", "phi4:14b-q8_0" etc.
-DEFAULT_MODEL = "phi4:14b"
+# LLM Options: "phi4:14b-q8_0", "llama3.2:3b", "qwq:32b", "phi4:14b-q4_K_M"
+DEFAULT_MODEL = "phi4:14b-q8_0"
 LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", DEFAULT_MODEL)
 
 try:
@@ -61,7 +62,7 @@ except Exception as e:
 
 # ------------------- Embedding Model Configuration -------------------
 
-DEFAULT_EMBED_MODEL = "nomic-embed-text"
+DEFAULT_EMBED_MODEL = "nomic-embed-text:v1.5"
 EMBED_MODEL_NAME = os.getenv("EMBED_MODEL_NAME", DEFAULT_EMBED_MODEL)
 
 try:
@@ -70,7 +71,9 @@ try:
     logger.info("Using Ollama embedding model: %s", EMBED_MODEL_NAME)
 except Exception as e:
     logger.warning(
-        "Ollama embeddings not available; falling back to Hugging Face. Error: %s", e
+        "Ollama embeddings not available. "
+        "Falling back to Hugging Face. Error: %s",
+        e,
     )
     EMBED_MODEL = HuggingFaceEmbedding(model_name="all-MiniLM-L6-v2")
 
@@ -88,7 +91,8 @@ CONTEXT_WINDOW = int(os.getenv("CONTEXT_WINDOW", 8192))
 NUM_OUTPUT_TOKENS = min(2000, CONTEXT_WINDOW // 2)
 
 # Retrieval parameters for similarity-based document search
-SIMILARITY_TOP_K = int(os.getenv("SIMILARITY_TOP_K", 5))  # Top-K matching chunks
+# Top-K matching chunks
+SIMILARITY_TOP_K = int(os.getenv("SIMILARITY_TOP_K", 5))
 SIMILARITY_CUTOFF = float(
     os.getenv("SIMILARITY_CUTOFF", 0.8)
 )  # Minimum similarity threshold
@@ -129,7 +133,7 @@ if DEBUG_MODE:
 # Prevent tokenizer-related deadlocks in parallel environments
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-# Ensure root and 'ChatRagi' loggers capture debug output if DEBUG_MODE is enabled
+# Loggers capture debug output if DEBUG_MODE is enabled
 if DEBUG_MODE:
     logging.getLogger().setLevel(logging.DEBUG)  # root logger
     logging.getLogger("ChatRagi").setLevel(logging.DEBUG)  # project logger

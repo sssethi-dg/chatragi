@@ -14,7 +14,8 @@ def write_to_csv(filename, rows, headers):
 
     Args:
         filename (str): Name of the output CSV file.
-        rows (List[List[str]]): List of rows, each row is a list of string values.
+        rows (List[List[str]]): List of rows,
+        each row is a list of string values.
         headers (List[str]): List of column headers.
     """
     with open(filename, mode="w", newline="", encoding="utf-8") as file:
@@ -55,7 +56,10 @@ def export_chromadb_contents():
         if stored_docs.get("documents"):
             document_rows = [
                 [format_text(doc), meta.get("file_name", "Unknown File")]
-                for doc, meta in zip(stored_docs["documents"], stored_docs["metadatas"])
+                for doc, meta in zip(
+                    stored_docs["documents"],
+                    stored_docs["metadatas"],
+                )
             ]
             write_to_csv(
                 "documents.csv",

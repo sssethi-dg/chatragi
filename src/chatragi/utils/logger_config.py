@@ -59,7 +59,10 @@ def setup_logger() -> logging.Logger:
     if not logger.handlers:
         # Rotating log file (max 5MB per file, keep 3 backups)
         file_handler = RotatingFileHandler(
-            LOG_FILE, maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8"  # 5MB
+            LOG_FILE,
+            maxBytes=5 * 1024 * 1024,
+            backupCount=3,
+            encoding="utf-8",  # 5MB
         )
         file_formatter = logging.Formatter(
             "%(asctime)s - %(levelname)s - %(name)s - %(message)s"

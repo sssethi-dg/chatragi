@@ -24,7 +24,9 @@ def main():
 
         # Capture persona selection
         persona_input = (
-            input("Choose a persona (default/professional/witty): ").strip().lower()
+            input("Choose a persona (default/professional/witty): ")
+            .strip()
+            .lower()
         )
         persona = (
             persona_input

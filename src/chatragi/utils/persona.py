@@ -1,7 +1,8 @@
 """
 Persona Tone Utilities
 
-Provides persona tone enumeration and functions to adjust chatbot input prompts accordingly.
+Provides persona tone enumeration and functions to adjust chatbot input
+prompts accordingly.
 """
 
 from enum import Enum

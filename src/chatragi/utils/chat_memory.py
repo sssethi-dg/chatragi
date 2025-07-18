@@ -2,7 +2,8 @@
 Chat Memory Module for ChatRagi
 
 Handles storing, retrieving, and ranking chatbot memory entries.
-Includes deduplication using memory_key, time decay scoring, and importance flagging.
+Includes deduplication using memory_key, time decay scoring, and importance
+flagging.
 """
 
 import re
@@ -121,15 +122,21 @@ def store_memory(user_query: str, response: str, is_important: bool) -> None:
                         metadatas=[
                             {
                                 "user_query": normalized_query,
-                                "timestamp": existing_metadata.get("timestamp"),
+                                "timestamp": existing_metadata.get(
+                                    "timestamp"
+                                ),
                                 "memory_key": memory_key,
                                 "important": True,
                             }
                         ],
                     )
-                    logger.info("Updated memory to important: %s", existing_match_id)
+                    logger.info(
+                        "Updated memory to important: %s", existing_match_id
+                    )
                 except Exception as e:
-                    logger.exception("Failed to update memory importance: %s", e)
+                    logger.exception(
+                        "Failed to update memory importance: %s", e
+                    )
             else:
                 logger.info("Duplicate found. No update needed.")
             return
@@ -169,7 +176,9 @@ def retrieve_memory(user_query: str) -> list:
         list: Top 3 memory entries (as strings).
     """
     try:
-        results = memory_collection.query(query_texts=[user_query], n_results=5)
+        results = memory_collection.query(
+            query_texts=[user_query], n_results=5
+        )
     except Exception as e:
         logger.exception("Error querying memory_collection: %s", e)
         return []
@@ -186,7 +195,9 @@ def retrieve_memory(user_query: str) -> list:
 
             timestamp = meta.get("timestamp")
             if not timestamp:
-                logger.warning("Missing timestamp in memory metadata: %s", meta)
+                logger.warning(
+                    "Missing timestamp in memory metadata: %s", meta
+                )
                 continue
 
             try:
@@ -198,7 +209,9 @@ def retrieve_memory(user_query: str) -> list:
 
                 scored_results.append((doc_str.strip(), combined_score))
             except Exception as e:
-                logger.exception("Error processing memory entry %s: %s", meta, e)
+                logger.exception(
+                    "Error processing memory entry %s: %s", meta, e
+                )
 
     scored_results.sort(key=lambda x: x[1], reverse=True)
     return [doc for doc, _ in scored_results[:3]]
@@ -209,7 +222,8 @@ def fetch_all_memories() -> list:
     Fetches all stored memory entries from the database.
 
     Returns:
-        list: List of memory records (each with user_query, timestamp, importance flag, and conversation text).
+        list: List of memory records (each with user_query, timestamp,
+        importance flag, and conversation text).
     """
     try:
         results = memory_collection.get()

@@ -1,9 +1,9 @@
 """
 ChatRagi Chatbot Application
 
-This module manages vector-based document retrieval and response generation using
-RetrieverQueryEngine and ChromaDB. It supports contextual memory, structured responses,
-and metadata-based citation extraction.
+This module manages vector-based document retrieval and response generation
+using RetrieverQueryEngine and ChromaDB. It supports contextual memory,
+structured responses, and metadata-based citation extraction.
 
 Main Features:
 - Vector index refresh/load logic
@@ -43,7 +43,8 @@ def refresh_index():
     """
     Initializes or refreshes the vector index and sets up the query engine.
 
-    Loads an existing index from disk if available; otherwise builds a new one from ChromaDB.
+    Loads an existing index from disk if available; otherwise builds a new one
+    from ChromaDB.
     """
     global query_engine
 
@@ -61,7 +62,9 @@ def refresh_index():
         if os.path.exists(PERSIST_DIR) and os.listdir(PERSIST_DIR):
             logger.info("Loading existing index from disk.")
             index = VectorStoreIndex.from_vector_store(
-                vector_store=ChromaVectorStore(chroma_collection=doc_collection),
+                vector_store=ChromaVectorStore(
+                    chroma_collection=doc_collection
+                ),
                 storage_context=storage_context,
                 embed_model=EMBED_MODEL,
             )
@@ -70,12 +73,15 @@ def refresh_index():
             documents = [
                 Document(text=doc_text, metadata=meta)
                 for doc_text, meta in zip(
-                    stored_docs.get("documents", []), stored_docs.get("metadatas", [])
+                    stored_docs.get("documents", []),
+                    stored_docs.get("metadatas", []),
                 )
                 if doc_text
             ]
             index = VectorStoreIndex.from_documents(
-                documents, storage_context=storage_context, embed_model=EMBED_MODEL
+                documents,
+                storage_context=storage_context,
+                embed_model=EMBED_MODEL,
             )
             index.storage_context.persist(persist_dir=PERSIST_DIR)
 
@@ -99,13 +105,18 @@ def ask_bot(user_input: str, persona: str = "default") -> str:
 
     Args:
         user_input (str): User's question or statement.
-        persona (str): Selected response tone ("default", "professional", "witty").
+        persona (str): Selected response tone:
+            - "default"
+            - "professional"
+            - "witty"
 
     Returns:
         str: Response from the chatbot.
     """
     if not query_engine:
-        raise RuntimeError("Query engine not initialized. Call refresh_index() first.")
+        raise RuntimeError(
+            "Query engine not initialized. Call refresh_index() first."
+        )
 
     # Parse the persona tone safely
     try:
@@ -121,14 +132,17 @@ def ask_bot(user_input: str, persona: str = "default") -> str:
     raw_response = getattr(response, "response", str(response)).strip()
 
     # Store conversation memory (save original user input and raw response)
-    store_memory(user_query=user_input, response=raw_response, is_important=False)
+    store_memory(
+        user_query=user_input, response=raw_response, is_important=False
+    )
 
     return raw_response
 
 
 def ask_chatbot(query: str) -> dict:
     """
-    Sends a query to the chatbot and returns both the generated answer and source citations.
+    Sends a query to the chatbot and returns both the generated answer and
+    source citations.
 
     Args:
         query (str): The user's question.
@@ -136,12 +150,16 @@ def ask_chatbot(query: str) -> dict:
     Returns:
         dict: Dictionary containing:
             - 'answer' (str): The chatbot's final answer.
-            - 'citations' (List[str]): List of unique source file names used in the answer.
+            - 'citations' (List[str]): List of unique source file names used
+            in the answer.
     """
     try:
         if not query_engine:
             logger.error("Query engine not initialized.")
-            return {"answer": "Query engine is not initialized.", "citations": []}
+            return {
+                "answer": "Query engine is not initialized.",
+                "citations": [],
+            }
 
         # Directly query the engine
         response = query_engine.query(query)

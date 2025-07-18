@@ -1,7 +1,8 @@
 """
 File Watcher Service for ChatRagi
 
-Monitors the data folder for new document files and processes them for indexing.
+Monitors the data folder for new document files and processes them for
+indexing.
 Processed files are archived to avoid duplicate indexing.
 """
 
@@ -50,7 +51,11 @@ def is_file_stable(file_path: str, wait_time: int = 2) -> bool:
         current_size = os.path.getsize(file_path)
         return initial_size == current_size
     except Exception as e:
-        logger.exception("Error checking file stability for '%s': %s", file_path, e)
+        logger.exception(
+            "Error checking file stability for '%s': %s",
+            file_path,
+            e,
+        )
         return False
 
 
@@ -71,7 +76,10 @@ def process_existing_files():
                 continue
 
             if file_name in existing_docs:
-                logger.info("File '%s' is already indexed. Skipping.", file_name)
+                logger.info(
+                    "File '%s' is already indexed. Skipping.",
+                    file_name,
+                )
                 continue
 
             if is_file_stable(file_path):
@@ -80,7 +88,10 @@ def process_existing_files():
                 processed_files.add(file_name)
 
         indexed_count = len(doc_collection.get().get("documents", []))
-        logger.info("ChromaDB now contains %d indexed document chunks.", indexed_count)
+        logger.info(
+            "ChromaDB now contains %d indexed document chunks.",
+            indexed_count,
+        )
 
     except Exception as e:
         logger.exception("Error processing existing files: %s", e)
@@ -123,14 +134,21 @@ class NewFileHandler(FileSystemEventHandler):
             process_new_documents(file_path)
             processed_files.add(file_name)
 
-            doc_collection = chroma_client.get_or_create_collection("doc_index")
+            doc_collection = chroma_client.get_or_create_collection(
+                "doc_index"
+            )
             indexed_count = len(doc_collection.get().get("documents", []))
             logger.info(
-                "ChromaDB now contains %d indexed document chunks.", indexed_count
+                "ChromaDB now contains %d indexed document chunks.",
+                indexed_count,
             )
 
         except Exception as e:
-            logger.exception("Error processing new file '%s': %s", file_name, e)
+            logger.exception(
+                "Error processing new file '%s': %s",
+                file_name,
+                e,
+            )
 
 
 if __name__ == "__main__":

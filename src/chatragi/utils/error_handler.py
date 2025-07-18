@@ -2,9 +2,10 @@
 Global Error Handler Module for ChatRagi
 
 This module provides a centralized exception handler for Flask routes.
-It logs unhandled exceptions using the configured logger and returns a standardized
-JSON error response to the client, including a unique error ID for easier debugging
-and basic categorization of known user errors vs internal server errors.
+It logs unhandled exceptions using the configured logger and returns a
+standardized JSON error response to the client, including a unique error ID for
+easier debugging and basic categorization of known user errors vs internal
+server errors.
 """
 
 import uuid
@@ -51,10 +52,15 @@ def handle_exception(e):
 
     # Client error detection
     if isinstance(e, (BadRequest, NotFound, Forbidden)):
-        logger.warning("Client error occurred. Error ID: %s", error_id, exc_info=e)
+        logger.warning(
+            "Client error occurred. Error ID: %s", error_id, exc_info=e
+        )
         message = str(e.description) if hasattr(e, "description") else str(e)
         return build_error_response(
-            "client_error", message, error_id, e.code if hasattr(e, "code") else 400
+            "client_error",
+            message,
+            error_id,
+            e.code if hasattr(e, "code") else 400,
         )
 
     # Otherwise, treat as server error

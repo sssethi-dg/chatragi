@@ -26,7 +26,8 @@ except Exception as e:
 
 def delete_non_important_memories() -> None:
     """
-    Deletes chatbot memory older than TIME_DECAY_DAYS unless marked as important.
+    Deletes chatbot memory older than TIME_DECAY_DAYS unless marked as
+    important.
 
     Helps maintain efficient memory usage by pruning outdated entries.
     """
@@ -138,7 +139,9 @@ def list_documents() -> list[dict]:
                 else:
                     file_stats[file_name]["chunks"] += 1
 
-        results = sorted(file_stats.values(), key=lambda x: x["file_name"].lower())
+        results = sorted(
+            file_stats.values(), key=lambda x: x["file_name"].lower()
+        )
 
         logger.info("Stored Documents in ChromaDB:")
         for i, doc in enumerate(results, start=1):

@@ -1,23 +1,32 @@
 """
 ChatRagi Web Application
 
-This Flask backend powers the ChatRagi chatbot interface. It includes endpoints for:
+This Flask backend powers the ChatRagi chatbot interface. It includes
+endpoints for:
 - Homepage rendering
 - Processing user queries
 - Memory storage and retrieval
 - Document listing
 - Index refresh
 
-The application integrates contextual memory retrieval, few-shot prompting, and markdown formatting.
+The application integrates contextual memory retrieval, few-shot prompting,
+and markdown formatting.
 """
 
 import re
 
 import markdown  # type: ignore[import]
 from flask import Flask, jsonify, render_template, request
-from markdown.extensions.fenced_code import FencedCodeExtension  # type: ignore[import]
+from markdown.extensions.fenced_code import FencedCodeExtension  # type: ignore
 
-from chatragi.utils.chat_memory import fetch_all_memories, retrieve_memory, store_memory
+# fmt: off
+from chatragi.utils.chat_memory import (
+    fetch_all_memories,
+    retrieve_memory,
+    store_memory,
+)
+
+# fmt: on
 from chatragi.utils.chatbot import query_engine, refresh_index
 from chatragi.utils.db_utils import list_documents
 from chatragi.utils.error_handler import handle_exception
@@ -50,7 +59,8 @@ def home():
 
 def format_response(response_text: str) -> str:
     """
-    Formats chatbot responses using Markdown and fixes common formatting inconsistencies.
+    Formats chatbot responses using Markdown and fixes common formatting
+    inconsistencies.
 
     Args:
         response_text (str): Raw LLM-generated response text.
@@ -120,14 +130,18 @@ def format_response(response_text: str) -> str:
         return response_text
 
 
-def format_structured_prompt(user_query: str, retrieved_memories: list[str]) -> str:
+def format_structured_prompt(
+    user_query: str,
+    retrieved_memories: list[str],
+) -> str:
     """
-    Builds a structured prompt using a few-shot style pattern for professional tone,
-    including relevant memory context.
+    Builds a structured prompt using a few-shot style pattern for professional
+    tone, including relevant memory context.
 
     Args:
         user_query (str): The latest user question.
-        retrieved_memories (list[str]): A list of memory snippets to include in the prompt.
+        retrieved_memories (list[str]): A list of memory snippets to include
+        in the prompt.
 
     Returns:
         str: A complete prompt ready to be submitted to the LLM.
@@ -135,15 +149,18 @@ def format_structured_prompt(user_query: str, retrieved_memories: list[str]) -> 
     # Persona introduction (always professional)
     persona_instruction = (
         "You are ChatRagi, a highly professional and formal assistant. "
-        "Answer in a polished, precise, and formal tone suitable for professional communication."
+        "Answer in a polished, precise, and formal tone suitable for"
+        "professional communication."
     )
 
     # Markdown formatting guide
     formatting_guide = (
         "Format your answers using Markdown with:\n"
         "- **Summary**: Provide a one or two sentence overview.\n"
-        "- **Details**: Use bullet points for explanations or steps. Use indented lists inside Details sections where appropriate.\n"
-        "- **Tips**: Offer best practices or optimization tips as bullet points.\n"
+        "- **Details**: Use bullet points for explanations or steps. "
+        "Use indented lists inside Details sections where appropriate.\n"
+        "- **Tips**: Offer best practices or optimization tips "
+        "as bullet points.\n"
         "Ensure your answers are cleanly structured and easy to read."
     )
 
@@ -151,13 +168,17 @@ def format_structured_prompt(user_query: str, retrieved_memories: list[str]) -> 
         "Examples:\n"
         "Q: What is vector search?\n"
         "A:\n"
-        "- **Summary**: Vector search finds similar content using numeric representations.\n"
-        "- **Details**: It compares semantic meaning using cosine similarity or distance metrics.\n"
-        "- **Tips**: Use high-quality embeddings and consistent chunk sizes.\n\n"
+        "- **Summary**: Vector search finds similar content using numeric "
+        "representations.\n"
+        "- **Details**: It compares semantic meaning using cosine similarity "
+        "or distance metrics.\n"
+        "- **Tips**: Use high-quality embeddings and consistent chunk "
+        "sizes.\n\n"
         "Q: What is document chunking?\n"
         "A:\n"
         "- **Summary**: Chunking splits large documents into smaller parts.\n"
-        "- **Details**: Chunks are embedded into a vector database to enable retrieval.\n"
+        "- **Details**: Chunks are embedded into a vector database to enable "
+        "retrieval.\n"
         "- **Tips**: Use chunk overlap and balance size for best results.\n"
     )
 
@@ -213,7 +234,10 @@ def ask():
         if tone == PersonaTone.PROFESSIONAL:
             # Use structured Markdown prompt for professional tone
             relevant_memories = retrieve_memory(user_query)
-            mod_prompt = format_structured_prompt(user_query, relevant_memories)
+            mod_prompt = format_structured_prompt(
+                user_query,
+                relevant_memories,
+            )
         else:
             # Use natural freeform persona prompts
             mod_prompt = apply_persona_tone(user_query, tone)
@@ -239,7 +263,11 @@ def ask():
         formatted_answer = format_response(raw_answer)
 
         # Store memory
-        store_memory(user_query=user_query, response=raw_answer, is_important=False)
+        store_memory(
+            user_query=user_query,
+            response=raw_answer,
+            is_important=False,
+        )
 
         return jsonify(
             {
@@ -257,7 +285,8 @@ def ask():
 @app.route("/store-memory", methods=["POST"])
 def store_memory_route():
     """
-    Stores chatbot interaction (user + response) in memory. Optionally marks it as important.
+    Stores chatbot interaction (user + response) in memory. Optionally marks
+    it as important.
 
     Request JSON:
         {
@@ -277,12 +306,16 @@ def store_memory_route():
 
         if not user_query or not response:
             return (
-                jsonify({"error": "Both 'user_query' and 'response' are required"}),
+                jsonify(
+                    {"error": "Both 'user_query' and 'response' are required"}
+                ),
                 400,
             )
 
         store_memory(user_query, response, is_important)
-        return jsonify({"status": "success", "message": "Memory stored successfully."})
+        return jsonify(
+            {"status": "success", "message": "Memory stored successfully."}
+        )
     except Exception as e:
         logger.exception("Failed to store memory: %s", e)
         return jsonify({"error": f"Failed to store memory: {str(e)}"}), 500
@@ -326,14 +359,18 @@ def all_memories():
     Fetches all stored chatbot memories for user review.
 
     Returns:
-        JSON: List of memory entries including timestamp, content, and importance.
+        JSON: List of memory entries including timestamp, content,
+        and importance.
     """
     try:
         memories = fetch_all_memories()
         return jsonify({"memories": memories})
     except Exception as e:
         logger.exception("Failed to retrieve memories: %s", e)
-        return jsonify({"error": f"Failed to retrieve memories: {str(e)}"}), 500
+        return (
+            jsonify({"error": f"Failed to retrieve memories: {str(e)}"}),
+            500,
+        )
 
 
 if __name__ == "__main__":

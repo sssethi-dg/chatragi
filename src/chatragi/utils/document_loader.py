@@ -47,13 +47,17 @@ def move_to_archive(filename: str):
     dest_path = os.path.join(ARCHIVE_FOLDER, filename)
 
     if not os.path.exists(src_path):
-        logger.warning("File '%s' not found in '%s'. Skipping.", filename, DATA_FOLDER)
+        logger.warning(
+            "File '%s' not found in '%s'. Skipping.", filename, DATA_FOLDER
+        )
         return
 
     if os.path.exists(dest_path):
         base, ext = os.path.splitext(filename)
         counter = 1
-        while os.path.exists(os.path.join(ARCHIVE_FOLDER, f"{base}_{counter}{ext}")):
+        while os.path.exists(
+            os.path.join(ARCHIVE_FOLDER, f"{base}_{counter}{ext}")
+        ):
             counter += 1
         dest_path = os.path.join(ARCHIVE_FOLDER, f"{base}_{counter}{ext}")
 
@@ -170,12 +174,15 @@ def load_pdf(file_path: str) -> List[dict]:
     try:
         with pdfplumber.open(file_path) as pdf:
             text = "\n\n".join(
-                page.extract_text() for page in pdf.pages if page.extract_text()
+                page.extract_text()
+                for page in pdf.pages
+                if page.extract_text()
             )
 
         if not text.strip():
             logger.warning(
-                "Skipping empty or unreadable PDF: %s", os.path.basename(file_path)
+                "Skipping empty or unreadable PDF: %s",
+                os.path.basename(file_path),
             )
             return []
 
@@ -200,7 +207,9 @@ def load_csv(file_path: str) -> List[dict]:
     try:
         df = pd.read_csv(file_path)
         if df.empty:
-            logger.warning("Skipping empty CSV: %s", os.path.basename(file_path))
+            logger.warning(
+                "Skipping empty CSV: %s", os.path.basename(file_path)
+            )
             return []
 
         text = df.to_string(index=False)
@@ -231,7 +240,9 @@ def load_json(file_path: str) -> List[dict]:
                 data = [json.loads(line) for line in f if line.strip()]
 
         if not data:
-            logger.warning("Skipping empty JSON: %s", os.path.basename(file_path))
+            logger.warning(
+                "Skipping empty JSON: %s", os.path.basename(file_path)
+            )
             return []
 
         source = "jsonl" if isinstance(data, list) else "json"
@@ -259,7 +270,9 @@ def load_txt(file_path: str) -> List[dict]:
             text = f.read().strip()
 
         if not text:
-            logger.warning("Skipping empty TXT: %s", os.path.basename(file_path))
+            logger.warning(
+                "Skipping empty TXT: %s", os.path.basename(file_path)
+            )
             return []
 
         return chunk_text(text, os.path.basename(file_path), "text")
@@ -298,7 +311,8 @@ def load_document(file_path: str) -> List[dict]:
 
 def process_new_documents(file_path: str):
     """
-    Processes a new file: splits, checks for duplicates, and indexes into ChromaDB.
+    Processes a new file: splits, checks for duplicates, and indexes
+    into ChromaDB.
 
     Args:
         file_path (str): Full path to the new document.
@@ -307,7 +321,9 @@ def process_new_documents(file_path: str):
 
     file_hash = compute_file_hash(file_path)
     if not file_hash:
-        logger.warning("Hash computation failed for '%s'. Skipping.", file_path)
+        logger.warning(
+            "Hash computation failed for '%s'. Skipping.", file_path
+        )
         return
 
     chunks = load_document(file_path)
@@ -331,7 +347,8 @@ def process_new_documents(file_path: str):
 
     try:
         documents = [
-            Document(text=chunk["text"], metadata=chunk["metadata"]) for chunk in chunks
+            Document(text=chunk["text"], metadata=chunk["metadata"])
+            for chunk in chunks
         ]
 
         storage_context = StorageContext.from_defaults(
